@@ -145,21 +145,6 @@
       clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
     }
 
-    .skip-link {
-      position: absolute;
-      left: var(--space-4);
-      top: var(--space-4);
-      transform: translateY(-200%);
-      z-index: 200;
-      background: var(--color-primary);
-      color: var(--color-text-inverse);
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-full);
-      text-decoration: none;
-      font-size: var(--text-sm);
-    }
-    .skip-link:focus { transform: translateY(0); }
-
     .wrap { margin: 0 2rem; }
 
     /* ── Top bar ──────────────────────────────────────────────── */
@@ -550,8 +535,6 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#workspace">Skip to content</a>
-
   <!-- ── Header ──────────────────────────────────────────────── -->
   <header class="topbar" role="banner">
     <div class="wrap topbar-inner">
