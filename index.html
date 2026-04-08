@@ -13,8 +13,9 @@
 
   <script>
     (() => {
+      const saved = (() => { try { return localStorage.getItem("json-theme"); } catch { return null; } })();
       const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
     })();
   </script>
 
@@ -765,6 +766,7 @@
 
       btn.addEventListener("click", () => {
         mode = mode === "dark" ? "light" : "dark";
+        try { localStorage.setItem("json-theme", mode); } catch (_) { /* sandboxed — ignore */ }
         applyTheme();
       });
 
