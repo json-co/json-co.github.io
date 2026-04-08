@@ -70,8 +70,8 @@
       --shadow-inset: inset 0 1px 3px rgba(30, 28, 20, 0.07);
 
       --trans:        180ms cubic-bezier(0.16, 1, 0.3, 1);
-      --font-display: "Cabinet Grotesk", "Inter", sans-serif;
-      --font-body:    "Satoshi", "Inter", sans-serif;
+      --font-display: "Inter", sans-serif;
+      --font-body:    "Inter", sans-serif;
       --font-mono:    ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
@@ -358,7 +358,7 @@
       padding: var(--space-4) var(--space-2);
       font-family: var(--font-mono);
       font-size: 0.78rem;
-      line-height: 1.65;
+      line-height: calc(0.92rem * 1.65); /* = 1.518rem — exact match with textarea */
       color: var(--color-text-faint);
       text-align: right;
       user-select: none;
