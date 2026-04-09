@@ -767,7 +767,7 @@
           <div class="chip-row" aria-label="Document statistics" aria-live="polite">
             <span class="chip">Lines: <strong id="lines-text">0</strong></span>
             <span class="chip">Bytes: <strong id="bytes-text">0</strong></span>
-            <span class="chip" id="chip-indent">Indent: <strong id="indent-display">2 spaces</strong></span>
+            <span class="chip">Indent</span>
             <select class="chip indent-select" id="indent-select" aria-label="Indentation size">
               <option value="2"   selected>2 spaces</option>
               <option value="4">4 spaces</option>
@@ -837,7 +837,6 @@
       const metaIn       = document.getElementById("meta-input");
       const metaOut      = document.getElementById("meta-output");
       const msgBox       = document.getElementById("msg-box");
-      const indentEl     = document.getElementById("indent-display");
       const linesEl      = document.getElementById("lines-text");
       const bytesEl      = document.getElementById("bytes-text");
       const chipStatus   = document.getElementById("chip-status");
@@ -1346,8 +1345,7 @@
       indentSelect.addEventListener("change", () => {
         const val = indentSelect.value;
         indent = val === "tab" ? "\t" : Number(val);
-        indentEl.textContent = val === "tab" ? "Tab" : `${val} spaces`;
-        if (elOut.value) beautify(); // explicit user action — bypass debounce
+        if (elOut.value) beautify();
       });
 
       /* ── Debounced auto-beautify ──────────────────────────── */
