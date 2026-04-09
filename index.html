@@ -1244,6 +1244,14 @@
       const setViewMode = (mode) => {
         outputMode = mode;
         const isRaw = mode === "raw";
+        if (!isRaw) {
+          const h = outEdShell.getBoundingClientRect().height;
+          treeShell.style.height = "";
+          treeShell.style.minHeight = "calc(100vh - 288px)";
+        } else {
+          treeShell.style.height = "";
+          treeShell.style.minHeight = "";
+        }
         outEdShell.hidden = !isRaw;
         treeShell.hidden = isRaw;
         treeActionsEl.classList.toggle("visible", !isRaw);
