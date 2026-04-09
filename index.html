@@ -244,7 +244,7 @@
       color: var(--color-text-muted);
       max-width: none;
     }
-    .panel-body { padding: var(--space-5); display: grid; gap: var(--space-5); }
+    .panel-body { padding: var(--space-5); display: grid; gap: var(--space-1); padding-bottom: var(--space-1); }
     /* ── Toolbar / Buttons ────────────────────────────────────── */
     .toolbar {
       display: flex;
@@ -410,9 +410,9 @@
     }
     .msg-box[data-state="ok"]  { color: var(--color-success); }
     .msg-box[data-state="err"] { color: var(--color-error); }
-    .msg-box strong { font-size: var(--text-sm); white-space: nowrap; }
+    .msg-box strong { font-size: var(--text-xs); white-space: nowrap; }
     .msg-box strong::after { content: ":"; margin-right: 0.15em; }
-    .msg-box p { font-size: var(--text-sm); margin: 0; color: var(--color-text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .msg-box p { font-size: var(--text-xs); margin: 0; color: var(--color-text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .msg-box[data-state="ok"] p,
     .msg-box[data-state="err"] p { color: inherit; opacity: 0.8; }
     /* ── Status bar ───────────────────────────────────────────── */
