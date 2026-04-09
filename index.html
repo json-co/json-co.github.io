@@ -745,7 +745,7 @@
           <!-- Message box -->
           <div class="msg-box" id="msg-box" data-state="idle" role="status" aria-live="polite">
             <strong>Ready</strong>
-            <p>Paste JSON, upload a file, or load the sample.</p>
+            <p>Paste your raw JSON, upload a file, or load the sample.</p>
           </div>
         </div>
         <!-- Status bar -->
@@ -1219,7 +1219,7 @@
           updateStats("");
           setValidity(false);
           setStatus("Error", "bad");
-          setMsg("Parse error", error.message, "err");
+          setMsg("Error", error.message, "err");
         }
       };
 
@@ -1239,7 +1239,7 @@
           updateStats("");
           setValidity(false);
           setStatus("Error", "bad");
-          setMsg("Parse error", error.message, "err");
+          setMsg("Rrror", error.message, "err");
         }
       };
 
@@ -1250,7 +1250,7 @@
         updateStats("");
         setValidity(false, true);
         setStatus("Ready");
-        setMsg("Cleared", "Both input/output fields are now empty and ready for a new payload.");
+        setMsg("Ready", "Both input/output fields are now empty and ready for a new payload.");
       };
 
       /* ── Clipboard ────────────────────────────────────────── */
@@ -1373,7 +1373,7 @@
           setValidity(false, true);
           updateStats("");
           setStatus("Ready");
-          setMsg("Ready", "Paste JSON, upload a file, or load the sample.");
+          setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
           /*
             FIX: Removed elIn.focus() here. It was called on every
             input event when the field became empty, which would
@@ -1436,7 +1436,7 @@
       refreshMeta();
       setValidity(false, true);
       setStatus("Ready");
-      setMsg("Ready", "Paste JSON, upload a file, or load the sample.");
+      setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       elIn.focus();
     })();
   </script>
