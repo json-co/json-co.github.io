@@ -692,13 +692,19 @@
       <div class="panel">
         <div class="panel-body">
           <div class="editors">
-            <!-- Input editor -->
+            <!-- Input -->
             <div class="ed-wrap">
               <div class="ed-topbar">
                 <label for="ed-input">Input</label>
                 <span class="ed-meta" id="meta-input">0 chars</span>
               </div>
               <div class="ed-shell" id="drop-zone">
+                <button class="pane-btn" style="position: absolute; right: 10px; top: 10px;" id="btn-paste-icon" title="Paste from clipboard" aria-label="Paste from clipboard">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                  </svg>
+                </button>
                 <pre class="line-nums" id="ln-input" aria-hidden="true">1</pre>
                 <textarea
                   id="ed-input"
@@ -710,7 +716,7 @@
                 ></textarea>
               </div>
             </div>
-            <!-- Output editor -->
+            <!-- Output -->
             <div class="ed-wrap">
               <div class="ed-topbar">
                 <label for="ed-output">Output</label>
@@ -727,6 +733,12 @@
                 </div>
               </div>
               <div class="ed-shell">
+                <button class="pane-btn" style="position: absolute; right: 10px; top: 10px;" id="btn-copy-icon" title="Copy to clipboard" aria-label="Copy to clipboard">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
                 <pre class="line-nums" id="ln-output" aria-hidden="true">1</pre>
                 <div class="highlight-overlay" id="highlight-output" aria-hidden="true"></div>
                 <textarea
@@ -1239,7 +1251,7 @@
           updateStats("");
           setValidity(false);
           setStatus("Error", "bad");
-          setMsg("Rrror", error.message, "err");
+          setMsg("Error", error.message, "err");
         }
       };
 
@@ -1280,6 +1292,33 @@
         } catch (error) {
           setStatus("Error", "bad");
           setMsg("Copy failed", error.message || "Clipboard access failed.", "err");
+        }
+      };
+      
+      /* ── Paste ─────────────────────────────────────────── */
+      const pasteIn = async () => {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            const text = await navigator.clipboard.readText();
+      
+            if (!text) {
+              setMsg("Nothing to paste", "Clipboard is empty.", "err");
+              return;
+            }
+      
+            elIn.value = text;
+            elIn.dispatchEvent(new Event("input", { bubbles: true }));
+      
+          } else {
+            throw new Error("Clipboard API not available");
+          }
+      
+          setStatus("Pasted ✓", "ok");
+          setMsg("Pasted", "Clipboard content inserted into input.", "ok");
+      
+        } catch (error) {
+          setStatus("Error", "bad");
+          setMsg("Paste failed", error.message || "Clipboard access failed.", "err");
         }
       };
 
@@ -1353,6 +1392,8 @@
       document.getElementById("btn-minify")    .addEventListener("click", minify);
       document.getElementById("btn-clear")     .addEventListener("click", makeItReady);
       document.getElementById("btn-copy")      .addEventListener("click", copyOut);
+      document.getElementById("btn-copy-icon")   .addEventListener("click", copyOut);
+      document.getElementById("btn-paste-icon")  .addEventListener("click", pasteIn);
       document.getElementById("btn-download")  .addEventListener("click", download);
       document.getElementById("btn-sample")    .addEventListener("click", loadSample);
       viewRawBtn.addEventListener("click", () => setViewMode("raw"));
