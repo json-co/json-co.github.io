@@ -594,7 +594,8 @@
       overflow: auto;
       background: var(--color-surface-2);
       box-shadow: var(--shadow-inset);
-      min-height: calc(100vh - 288px)
+      min-height: calc(100vh - 288px);
+      height: calc(100vh - 288px);
     }
     .tree-view {
       padding: var(--space-3) var(--space-4);
@@ -1244,14 +1245,6 @@
       const setViewMode = (mode) => {
         outputMode = mode;
         const isRaw = mode === "raw";
-        if (!isRaw) {
-          const h = outEdShell.getBoundingClientRect().height;
-          treeShell.style.height = "";
-          treeShell.style.minHeight = "calc(100vh - 288px)";
-        } else {
-          treeShell.style.height = "";
-          treeShell.style.minHeight = "";
-        }
         outEdShell.hidden = !isRaw;
         treeShell.hidden = isRaw;
         treeActionsEl.classList.toggle("visible", !isRaw);
