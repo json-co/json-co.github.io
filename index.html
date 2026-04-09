@@ -773,7 +773,6 @@
               <option value="8">8 spaces</option>
               <option value="tab">Tab</option>
             </select>
-            <span class="chip" id="chip-status"><strong id="status-display">Ready</strong></span>
           </div>
           <div class="btn-row">
             <button type="button" class="btn" id="btn-copy">
@@ -837,7 +836,6 @@
       const metaIn       = document.getElementById("meta-input");
       const metaOut      = document.getElementById("meta-output");
       const msgBox       = document.getElementById("msg-box");
-      const statusEl     = document.getElementById("status-display");
       const indentEl     = document.getElementById("indent-display");
       const validEl      = document.getElementById("valid-text");
       const linesEl      = document.getElementById("lines-text");
@@ -924,11 +922,6 @@
         strong.textContent = title;
         p.textContent = body;
         msgBox.append(strong, p);
-      };
-
-      const setStatus = (text, cls = "") => {
-        statusEl.textContent = text;
-        chipStatus.className = "chip" + (cls ? ` ${cls}` : "");
       };
 
       const setValidity = (isValid, empty = false) => {
