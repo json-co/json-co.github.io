@@ -1210,7 +1210,7 @@
           setStatus("Beautified ✓", "ok");
           setMsg(
             "Beautified successfully",
-            `Valid JSON formatted with ${typeof indent === "number" ? `${indent} spaces` : "tabs"} of indentation.`,
+            `JSON formatted with ${typeof indent === "number" ? `${indent} spaces` : "tabs"} of indentation.`,
             "ok"
           );
         } catch (error) {
@@ -1243,14 +1243,14 @@
         }
       };
 
-      const clearAll = () => {
+      const makeItReady = () => {
         elIn.value = "";
         setOutput("");
         refreshMeta();
         updateStats("");
         setValidity(false, true);
         setStatus("Ready");
-        setMsg("Ready", "Both input/output fields are now empty and ready for a new payload.");
+        setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       };
 
       /* ── Clipboard ────────────────────────────────────────── */
@@ -1276,7 +1276,7 @@
             legacyCopy(elOut.value);
           }
           setStatus("Copied ✓", "ok");
-          setMsg("Copied to clipboard", "The formatted JSON is ready to paste.", "ok");
+          setMsg("Copied", "The output JSON is copied to clipboard.", "ok");
         } catch (error) {
           setStatus("Error", "bad");
           setMsg("Copy failed", error.message || "Clipboard access failed.", "err");
@@ -1351,7 +1351,7 @@
       /* ── Button event listeners ───────────────────────────── */
       document.getElementById("btn-beautify")  .addEventListener("click", beautify);
       document.getElementById("btn-minify")    .addEventListener("click", minify);
-      document.getElementById("btn-clear")     .addEventListener("click", clearAll);
+      document.getElementById("btn-clear")     .addEventListener("click", makeItReady);
       document.getElementById("btn-copy")      .addEventListener("click", copyOut);
       document.getElementById("btn-download")  .addEventListener("click", download);
       document.getElementById("btn-sample")    .addEventListener("click", loadSample);
@@ -1370,15 +1370,7 @@
         refreshMeta();
         if (!elIn.value.trim()) {
           clearTimeout(beautifyTimer); // cancel any pending beautify
-          setValidity(false, true);
-          updateStats("");
-          setStatus("Ready");
-          setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
-          /*
-            FIX: Removed elIn.focus() here. It was called on every
-            input event when the field became empty, which would
-            steal focus unexpectedly if the user had moved elsewhere.
-          */
+          makeItReady();
         } else {
           debouncedBeautify();
         }
@@ -1429,7 +1421,7 @@
         if (ctrl && event.key === "Enter")                            { event.preventDefault(); beautify(); }
         if (ctrl && event.key.toLowerCase() === "m" && !event.shiftKey) { event.preventDefault(); minify(); }
         if (ctrl && event.shiftKey && event.key.toLowerCase() === "c") { event.preventDefault(); copyOut(); }
-        if (ctrl && event.shiftKey && event.key.toLowerCase() === "x") { event.preventDefault(); clearAll(); }
+        if (ctrl && event.shiftKey && event.key.toLowerCase() === "x") { event.preventDefault(); makeItReady(); }
       });
 
       /* ── Initial state ────────────────────────────────────── */
