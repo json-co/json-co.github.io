@@ -996,7 +996,7 @@
       };
 
       const parseJSON = (raw) => {
-        if (!raw.trim()) throw new Error("Input is empty — please paste some JSON first.");
+        if (!raw.trim()) throw new Error("Input is empty, please paste some JSON first.");
         return JSON.parse(raw);
       };
 
@@ -1312,7 +1312,7 @@
         updateStats("");
         setValidity(false, true);
         setStatus("Ready");
-        setMsg("Cleared", "Both editors are now empty and ready for a new payload.");
+        setMsg("Cleared", "Both input/output fields are now empty and ready for a new payload.");
       };
 
       /* ── Clipboard ────────────────────────────────────────── */
