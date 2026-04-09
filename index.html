@@ -449,7 +449,7 @@
       padding: 0.1rem 1.8rem 0.1rem 0.85rem;
       border-radius: var(--radius-full);
       border: 1px solid var(--color-border);
-
+      color: var(--color-text);
       font-size: var(--text-xs);
       font-family: var(--font-body);
       cursor: pointer;
@@ -754,17 +754,17 @@
         <!-- Status bar -->
         <div class="statusbar">
           <div class="chip-row" aria-label="Document statistics" aria-live="polite">
-            <span class="chip" id="chip-valid">Validity: <strong id="valid-text">—</strong></span>
+            <!--<span class="chip" id="chip-valid">Validity: <strong id="valid-text">—</strong></span>-->
             <span class="chip">Lines: <strong id="lines-text">0</strong></span>
             <span class="chip">Bytes: <strong id="bytes-text">0</strong></span>
+            <span class="chip" id="chip-indent">Indent: <strong id="indent-display">2 spaces</strong></span>
             <select class="indent-select" id="indent-select" aria-label="Indentation size">
               <option value="2"   selected>2 spaces</option>
               <option value="4">4 spaces</option>
               <option value="8">8 spaces</option>
               <option value="tab">Tab</option>
             </select>
-            <span class="chip" id="chip-indent">Indent: <strong id="indent-display">2 spaces</strong></span>
-            <span class="chip" id="chip-status"><strong id="status-display">Ready</strong></span>
+            <!--<span class="chip" id="chip-status"><strong id="status-display">Ready</strong></span>-->
           </div>
           <div class="btn-row">
             <button type="button" class="btn" id="btn-copy">
