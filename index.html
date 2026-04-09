@@ -1414,6 +1414,7 @@
           updateStats("");
           setStatus("Ready");
           setMsg("Ready", "Paste JSON, upload a file, or load the sample.");
+          elIn.focus();
         } else {
           setStatus("Editing");
           updateStats(elIn.value);
