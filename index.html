@@ -1280,22 +1280,10 @@
         try {
           if (navigator.clipboard && window.isSecureContext) {
             const text = await navigator.clipboard.readText();
-      
-            if (!text) {
-              setMsg("Nothing to paste", "Clipboard is empty.", "err");
-              return;
-            }
-      
+            if (!text) return;
             elIn.value = text;
-            elIn.dispatchEvent(new Event("input", { bubbles: true }));
-      
-          } else {
-            throw new Error("Clipboard API not available");
+            beautify();
           }
-      
-          setStatus("Pasted ✓", "ok");
-          setMsg("Pasted", "Clipboard content inserted into input.", "ok");
-      
         } catch (error) {
           setStatus("Error", "bad");
           setMsg("Paste failed", error.message || "Clipboard access failed.", "err");
