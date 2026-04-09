@@ -449,7 +449,7 @@
     .chip.bad             { background: rgba(192, 21, 42, 0.08); color: var(--color-error); }
     .indent-select {
       padding: 0.1rem 1.8rem 0.1rem 0.85rem;
-      border-radius: var(--radius-full);
+      border-radius: 4px;
       border: 1px solid var(--color-border);
       color: var(--color-text);
       font-size: var(--text-xs);
@@ -767,11 +767,11 @@
           <div class="chip-row" aria-label="Document statistics" aria-live="polite">
             <span class="chip">Lines: <strong id="lines-text">0</strong></span>
             <span class="chip">Bytes: <strong id="bytes-text">0</strong></span>
-            <span class="chip">Indent</span>
+            <span>Indent</span>
             <select class="chip indent-select" id="indent-select" aria-label="Indentation size">
-              <option value="2"   selected>2 spaces</option>
+              <option value="2" selected>2 spaces</option>
+              <option value="3">3 spaces</option>
               <option value="4">4 spaces</option>
-              <option value="8">8 spaces</option>
               <option value="tab">Tab</option>
             </select>
           </div>
@@ -1204,7 +1204,7 @@
           refreshMeta();
           updateStats(formatted);
           setMsg(
-            "Beautified successfully",
+            "Beautified",
             `JSON formatted with ${typeof indent === "number" ? `${indent} spaces` : "tabs"} of indentation.`,
             "ok"
           );
@@ -1223,7 +1223,7 @@
           setOutput(minified);
           refreshMeta();
           updateStats(minified);
-          setMsg("Minified successfully", "All unnecessary whitespace has been removed.", "ok");
+          setMsg("Minified", "All unnecessary whitespace has been removed.", "ok");
         } catch (error) {
           setOutput("");
           refreshMeta();
