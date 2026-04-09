@@ -1203,7 +1203,6 @@
           setOutput(formatted);
           refreshMeta();
           updateStats(formatted);
-          setStatus("Beautified ✓", "ok");
           setMsg(
             "Beautified successfully",
             `JSON formatted with ${typeof indent === "number" ? `${indent} spaces` : "tabs"} of indentation.`,
@@ -1213,7 +1212,6 @@
           setOutput("");
           refreshMeta();
           updateStats("");
-          setStatus("Error", "bad");
           setMsg("Error", error.message, "err");
         }
       };
@@ -1225,13 +1223,11 @@
           setOutput(minified);
           refreshMeta();
           updateStats(minified);
-          setStatus("Minified ✓", "ok");
           setMsg("Minified successfully", "All unnecessary whitespace has been removed.", "ok");
         } catch (error) {
           setOutput("");
           refreshMeta();
           updateStats("");
-          setStatus("Error", "bad");
           setMsg("Error", error.message, "err");
         }
       };
@@ -1241,7 +1237,6 @@
         setOutput("");
         refreshMeta();
         updateStats("");
-        setStatus("Ready");
         setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       };
 
@@ -1267,10 +1262,8 @@
           } else {
             legacyCopy(elOut.value);
           }
-          setStatus("Copied ✓", "ok");
           setMsg("Copied", "The output JSON is copied to clipboard.", "ok");
         } catch (error) {
-          setStatus("Error", "bad");
           setMsg("Copy failed", error.message || "Clipboard access failed.", "err");
         }
       };
@@ -1285,7 +1278,6 @@
             beautify();
           }
         } catch (error) {
-          setStatus("Error", "bad");
           setMsg("Paste failed", error.message || "Clipboard access failed.", "err");
         }
       };
@@ -1321,10 +1313,8 @@
           elIn.value = text;
           refreshMeta();
           updateStats(text);
-          setStatus("Loaded");
           setMsg("File loaded", `${file.name} loaded — click Beautify to format it.`, "ok");
         } catch (error) {
-          setStatus("Error", "bad");
           setMsg("Upload failed", error.message || "Unable to read this file.", "err");
         }
       };
@@ -1433,7 +1423,6 @@
 
       /* ── Initial state ────────────────────────────────────── */
       refreshMeta();
-      setStatus("Ready");
       setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       elIn.focus();
     })();
