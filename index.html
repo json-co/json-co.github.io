@@ -763,7 +763,6 @@
         <!-- Status bar -->
         <div class="statusbar">
           <div class="chip-row" aria-label="Document statistics" aria-live="polite">
-            <span class="chip" id="chip-valid">Validity: <strong id="valid-text">—</strong></span>
             <span class="chip">Lines: <strong id="lines-text">0</strong></span>
             <span class="chip">Bytes: <strong id="bytes-text">0</strong></span>
             <span class="chip" id="chip-indent">Indent: <strong id="indent-display">2 spaces</strong></span>
@@ -837,10 +836,8 @@
       const metaOut      = document.getElementById("meta-output");
       const msgBox       = document.getElementById("msg-box");
       const indentEl     = document.getElementById("indent-display");
-      const validEl      = document.getElementById("valid-text");
       const linesEl      = document.getElementById("lines-text");
       const bytesEl      = document.getElementById("bytes-text");
-      const chipValid    = document.getElementById("chip-valid");
       const chipStatus   = document.getElementById("chip-status");
       const fileIn       = document.getElementById("file-in");
       const dropZone     = document.getElementById("drop-zone");
@@ -922,12 +919,6 @@
         strong.textContent = title;
         p.textContent = body;
         msgBox.append(strong, p);
-      };
-
-      const setValidity = (isValid, empty = false) => {
-        if (empty) { validEl.textContent = "—"; chipValid.className = "chip"; return; }
-        validEl.textContent = isValid ? "Valid JSON" : "Invalid JSON";
-        chipValid.className  = isValid ? "chip ok"   : "chip bad";
       };
 
       const updateStats = (text) => {
@@ -1211,7 +1202,6 @@
           setOutput(formatted);
           refreshMeta();
           updateStats(formatted);
-          setValidity(true);
           setStatus("Beautified ✓", "ok");
           setMsg(
             "Beautified successfully",
@@ -1222,7 +1212,6 @@
           setOutput("");
           refreshMeta();
           updateStats("");
-          setValidity(false);
           setStatus("Error", "bad");
           setMsg("Error", error.message, "err");
         }
@@ -1235,14 +1224,12 @@
           setOutput(minified);
           refreshMeta();
           updateStats(minified);
-          setValidity(true);
           setStatus("Minified ✓", "ok");
           setMsg("Minified successfully", "All unnecessary whitespace has been removed.", "ok");
         } catch (error) {
           setOutput("");
           refreshMeta();
           updateStats("");
-          setValidity(false);
           setStatus("Error", "bad");
           setMsg("Error", error.message, "err");
         }
@@ -1253,7 +1240,6 @@
         setOutput("");
         refreshMeta();
         updateStats("");
-        setValidity(false, true);
         setStatus("Ready");
         setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       };
@@ -1345,7 +1331,6 @@
           const text = await file.text();
           elIn.value = text;
           refreshMeta();
-          setValidity(false, !text.trim());
           updateStats(text);
           setStatus("Loaded");
           setMsg("File loaded", `${file.name} loaded — click Beautify to format it.`, "ok");
@@ -1460,7 +1445,6 @@
 
       /* ── Initial state ────────────────────────────────────── */
       refreshMeta();
-      setValidity(false, true);
       setStatus("Ready");
       setMsg("Ready", "Paste your raw JSON, upload a file, or load the sample.");
       elIn.focus();
