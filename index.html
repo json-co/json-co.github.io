@@ -11,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/c/c9/JSON_vector_logo.svg">
   <link rel="alternate icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/160px-JSON_vector_logo.svg.png">
-
   <!--
     JSONEditor CSS.
     We use JSONEditor's code mode (Ace editor) for the output panel —
@@ -19,7 +18,6 @@
     We also keep a hidden text-mode instance as a jsonlint validation engine.
   -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.4/jsoneditor.min.css" />
-
   <!-- Anti-FOUC theme -->
   <script>
     (() => {
@@ -28,7 +26,6 @@
       document.documentElement.setAttribute('data-theme', saved || (dark ? 'dark' : 'light'));
     })();
   </script>
-
   <style>
     /* ── Design tokens ─────────────────────────────────────────── */
     :root, [data-theme="light"] {
@@ -87,7 +84,6 @@
       --shadow-lg:    0 20px 60px rgba(0,0,0,.5);
       --shadow-inset: inset 0 1px 3px rgba(0,0,0,.3);
     }
-
     /* ── Base reset ───────────────────────────────────────────── */
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     html {
@@ -109,11 +105,9 @@
     h1,h2,h3,h4 { line-height:1.1; }
     :focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; border-radius:var(--radius-sm); }
     ::selection { background:rgba(10,106,112,.2); }
-
     /* ── Utilities ────────────────────────────────────────────── */
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border-width:0; }
     .wrap { max-width:1710px; margin-inline:auto; padding-inline:1rem; }
-
     /* ── Top bar ──────────────────────────────────────────────── */
     .topbar {
       position:sticky; top:0; z-index:80;
@@ -138,7 +132,6 @@
     }
     .icon-btn:hover { background:var(--color-surface-offset); transform:translateY(-1px); }
     .icon-btn:active { transform:none; }
-
     /* ── Main layout ──────────────────────────────────────────── */
     main { padding-top:var(--space-4); padding-bottom:var(--space-4); }
     .workspace { display:grid; gap:var(--space-4); }
@@ -149,7 +142,6 @@
     }
     [data-theme="dark"] .panel { background:rgba(22,22,20,.9); }
     .panel-body { padding:var(--space-5); display:grid; gap:var(--space-2); padding-bottom:var(--space-2); }
-
     /* ── Toolbar / Buttons ────────────────────────────────────── */
     .toolbar { display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; align-items:center; }
     .btn-row { display:flex; flex-wrap:wrap; gap:var(--space-2); }
@@ -164,7 +156,6 @@
     .btn:active { transform:none; box-shadow:var(--shadow-sm); }
     .btn.primary { background:var(--color-primary); color:var(--color-text-inverse); border-color:transparent; }
     .btn.primary:hover { background:var(--color-primary-hover); }
-
     /* ── Editors ──────────────────────────────────────────────── */
     .editors { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
     .ed-wrap  { display:grid; gap:var(--space-2); min-width:0; }
@@ -177,7 +168,6 @@
       background:var(--color-surface-2); box-shadow:var(--shadow-inset);
       min-height:calc(100vh - 270px); height:calc(100vh - 270px);
     }
-
     /* Input gutter — width driven by --gutter-w so JS can expand it for 10k+ lines */
     .ed-shell.has-gutter::before {
       content:""; position:absolute; inset:0 auto 0 0; width:var(--gutter-w, 3.4rem);
@@ -203,7 +193,6 @@
     textarea:focus { outline:none; }
     textarea::placeholder { color:var(--color-text-faint); }
     .hidden-file { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-
     /* ── Pane corner action buttons (paste/copy badges) ─────── */
     /* Sit at top-right of their shell; radius matches shell corner */
     .pane-btn {
@@ -215,7 +204,6 @@
       transition:color var(--trans), background var(--trans);
     }
     .pane-btn:hover { color:var(--color-primary); background:var(--color-surface-dynamic); }
-
     /* ── Message box ──────────────────────────────────────────── */
     .msg-row  { display:flex; align-items:center; gap:var(--space-2); }
     .msg-box  { display:flex; align-items:center; gap:var(--space-2); flex:1; transition:color var(--trans); }
@@ -226,13 +214,11 @@
     .msg-box p { font-size:var(--text-xs); margin:0; color:var(--color-text-muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg-box[data-state="ok"]  p,
     .msg-box[data-state="err"] p { color:inherit; opacity:.8; }
-
     /* Worker spinner */
     .w-spinner { width:.8rem; height:.8rem; flex:none; border:1.5px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; }
     .w-spinner:not(.active) { display:none; }
     .w-spinner.active { display:block; animation:wspin .65s linear infinite; }
     @keyframes wspin { to { transform:rotate(360deg); } }
-
     /* ── Status bar ───────────────────────────────────────────── */
     .statusbar {
       display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:center;
@@ -260,7 +246,6 @@
     }
     .indent-select:hover  { background-color:var(--color-surface-dynamic); }
     .indent-select:focus  { outline:2px solid var(--color-primary); outline-offset:2px; }
-
     /* ── Output view toggle ───────────────────────────────────── */
     .out-view-seg {
       display:inline-flex; align-items:center; gap:2px; padding:2px;
@@ -270,18 +255,6 @@
     .vbtn { padding-inline:var(--space-3); border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:500; color:var(--color-text-muted); transition:all var(--trans); cursor:pointer; border:none; background:none; }
     .vbtn[aria-pressed="true"] { background:var(--color-primary); color:var(--color-text-inverse); box-shadow:var(--shadow-sm); }
     .vbtn:not([aria-pressed="true"]):hover { background:var(--color-surface-dynamic); }
-
-    /* Tree actions */
-    .tree-actions { display:none; align-items:center; gap:var(--space-2); }
-    .tree-actions.visible { display:inline-flex; }
-    .tree-act-btn {
-      height:1.6rem; padding-inline:var(--space-3); border-radius:var(--radius-full);
-      font-size:var(--text-xs); font-weight:500; color:var(--color-text-muted);
-      border:1px solid var(--color-border); background:var(--color-surface-2);
-      cursor:pointer; transition:all var(--trans);
-    }
-    .tree-act-btn:hover { background:var(--color-surface-offset); color:var(--color-text); }
-
     /* ── Tree shell ───────────────────────────────────────────── */
     .tree-shell {
       border:1px solid var(--color-border); border-radius:var(--radius-lg);
@@ -289,7 +262,6 @@
       min-height:calc(100vh - 270px); height:calc(100vh - 270px);
     }
     .tree-view { padding:var(--space-3) var(--space-4) var(--space-3) var(--space-5); font-family:var(--font-mono); font-size:.92rem; min-width:max-content; }
-
     /* Tree nodes */
     .tn { display:block; }
     .tn-row { display:flex; align-items:center; gap:.25em; padding:.06em 3px; border-radius:var(--radius-sm); margin:0 -3px; white-space:nowrap; }
@@ -315,13 +287,11 @@
     [data-theme="dark"] .json-key  { color:#5dbcc4; } [data-theme="dark"] .json-str  { color:#f59e0b; }
     [data-theme="dark"] .json-num  { color:#a78bfa; } [data-theme="dark"] .json-bool { color:#60a5fa; }
     [data-theme="dark"] .json-null { color:#de79b8; } [data-theme="dark"] .json-punct{ color:#ada8a0; }
-
     /* Tree search highlight */
     .tn-row.tree-sh        { background:rgba(234,179,8,.18); border-radius:var(--radius-sm); }
     .tn-row.tree-sh.active { background:rgba(234,179,8,.42); outline:1px solid rgba(234,179,8,.65); }
     [data-theme="dark"] .tn-row.tree-sh        { background:rgba(234,179,8,.1); }
     [data-theme="dark"] .tn-row.tree-sh.active { background:rgba(234,179,8,.3); }
-
     /* ── Search overlay — floats above the editor, no layout impact ── */
     /* Opened with Ctrl+F; absolutely positioned inside .out-shells      */
     .out-shells { position:relative; }
@@ -387,21 +357,6 @@
     }
     .search-close-btn:hover { background:rgba(192,21,42,.1); color:var(--color-error); }
     [data-theme="dark"] .search-close-btn:hover { background:rgba(248,113,113,.1); color:var(--color-error); }
-
-    /* ── Tree "show more" pagination button ─────────────────── */
-    .tn-more-btn {
-      display:inline-flex; align-items:center; gap:var(--space-2);
-      margin:.35rem 0 .1rem 1.15rem;
-      padding:.22rem var(--space-3);
-      border-radius:var(--radius-full);
-      font-size:.76rem; font-weight:500; font-family:var(--font-mono);
-      color:var(--color-primary);
-      border:1px solid currentColor; background:transparent;
-      cursor:pointer; opacity:.75; transition:all var(--trans);
-    }
-    .tn-more-btn:hover { opacity:1; background:rgba(10,106,112,.07); }
-    [data-theme="dark"] .tn-more-btn:hover { background:rgba(93,188,196,.1); }
-
     /* ── Custom scrollbars ───────────────────────────────────── */
     /* WebKit (Chrome, Safari, Edge) */
     ::-webkit-scrollbar { width:5px; height:5px; }
@@ -411,7 +366,6 @@
     ::-webkit-scrollbar-corner { background:transparent; }
     /* Firefox */
     html { scrollbar-width:thin; scrollbar-color:var(--color-divider) transparent; }
-
     /* ── JSONEditor / Ace output overrides ────────────────────── */
     /* Strip all JSONEditor chrome — we keep only the Ace code pane */
     #out-je-wrap { position:absolute; inset:0; }
@@ -423,7 +377,6 @@
     #out-je-wrap .jsoneditor-modes,
     #out-je-wrap .jsoneditor-search { display:none !important; }
     #out-je-wrap .jsoneditor-code { height:100% !important; padding:0 !important; }
-
     /* Ace base */
     #out-je-wrap .ace_editor {
       font-family:var(--font-mono) !important; font-size:.92rem !important;
@@ -433,7 +386,6 @@
     #out-je-wrap .ace_content,
     #out-je-wrap .ace_text-layer { background:transparent !important; color:var(--color-text) !important; }
     #out-je-wrap .ace_layer { font-family:var(--font-mono) !important; }
-
     /* Gutter */
     #out-je-wrap .ace_gutter {
       background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface)) !important;
@@ -442,12 +394,10 @@
     }
     #out-je-wrap .ace_gutter-cell { padding-right:8px !important; font-size:.78rem !important; }
     #out-je-wrap .ace_gutter-active-line { background:transparent !important; }
-
     /* Active line, selection, cursor */
     #out-je-wrap .ace_active-line { background:rgba(10,106,112,.04) !important; }
     #out-je-wrap .ace_selection   { background:rgba(10,106,112,.18) !important; }
     #out-je-wrap .ace_cursor      { display:none !important; }    /* read-only: hide cursor */
-
     /* Ace search highlights (findAll / find uses these) */
     #out-je-wrap .ace_highlight-marker { background:rgba(234,179,8,.35) !important; border-radius:2px; }
     #out-je-wrap .ace_selected-word    { border: none; outline:1px solid rgba(94, 188, 196, .3); }
@@ -459,7 +409,6 @@
     #out-je-wrap .ace_paren,
     #out-je-wrap .ace_punctuation,
     #out-je-wrap .ace_keyword.ace_operator        { color:#69655e !important; }
-
     /* JSON syntax tokens — dark */
     [data-theme="dark"] #out-je-wrap .ace_scroller { background:var(--color-surface-2) !important; }
     [data-theme="dark"] #out-je-wrap .ace_gutter   {
@@ -476,7 +425,6 @@
     [data-theme="dark"] #out-je-wrap .ace_paren,
     [data-theme="dark"] #out-je-wrap .ace_punctuation,
     [data-theme="dark"] #out-je-wrap .ace_keyword.ace_operator  { color:#ada8a0 !important; }
-
     /* Indent guides — replace Ace's default dotted PNG with a clean design-token line */
     #out-je-wrap .ace_indent-guide {
       background: none !important;
@@ -487,18 +435,16 @@
     .ace_fold-widget, .ace_bracket {
       display: none !important;
     }
-    
+
     [data-theme="dark"] #out-je-wrap .ace_indent-guide {
       border-right-color: rgba(255,255,255,.07) !important;
     }
-
     /* Ace scrollbar — transparent bg so the shell bg shows through */
     #out-je-wrap .ace_scrollbar { transition:opacity .2s; background:transparent !important; }
     #out-je-wrap .ace_scrollbar::-webkit-scrollbar { width:5px; height:5px; }
     #out-je-wrap .ace_scrollbar::-webkit-scrollbar-track { background:transparent; }
     #out-je-wrap .ace_scrollbar::-webkit-scrollbar-thumb { background:var(--color-divider); border-radius:9999px; }
     #out-je-wrap .ace_scrollbar::-webkit-scrollbar-thumb:hover { background:var(--color-text-faint); }
-
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width:800px) { .editors { grid-template-columns:1fr; } }
     @media (max-width:640px) {
@@ -511,13 +457,11 @@
     @media (prefers-reduced-motion:reduce) {
       *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
     }
-
     /* JSONEditor hidden validation engine */
     #je-container { position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
   </style>
 </head>
 <body>
-
 <!-- ── Header ──────────────────────────────────────────────── -->
 <header class="topbar" role="banner">
   <div class="wrap topbar-inner">
@@ -560,14 +504,12 @@
     </div>
   </div>
 </header>
-
 <!-- ── Main ────────────────────────────────────────────────── -->
 <main class="wrap" id="main-content">
   <section class="workspace" aria-label="JSON workspace">
     <div class="panel">
       <div class="panel-body">
         <div class="editors">
-
           <!-- ── Input ─────────────────────────────────────── -->
           <div class="ed-wrap">
             <div class="ed-topbar">
@@ -584,27 +526,20 @@
                 placeholder="Paste your JSON here…" aria-label="Input JSON"></textarea>
             </div>
           </div>
-
           <!-- ── Output ────────────────────────────────────── -->
           <div class="ed-wrap">
             <div class="ed-topbar">
               <label>Output</label>
               <div style="display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;height: 25px;">
                 <span class="ed-meta" id="meta-output">0 chars</span>
-                <div class="tree-actions" id="tree-actions">
-                  <button type="button" class="tree-act-btn" id="btn-expand-all">Expand All</button>
-                  <button type="button" class="tree-act-btn" id="btn-collapse-all">Collapse All</button>
-                </div>
                 <div class="out-view-seg" role="group" aria-label="Output view mode">
                   <button type="button" class="vbtn" id="view-raw"  aria-pressed="true">Raw</button>
                   <button type="button" class="vbtn" id="view-tree" aria-pressed="false">Tree</button>
                 </div>
               </div>
             </div>
-
             <!-- Shells wrapper — search bar floats inside, no layout impact -->
             <div class="out-shells">
-
               <!-- Search overlay — open with Ctrl+F, absolute positioned over editor -->
               <div class="search-overlay" id="search-bar" hidden role="search" aria-label="Search output">
                 <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -628,7 +563,6 @@
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
               </div>
-
               <!-- Raw output — JSONEditor Ace editor fills this shell -->
               <div class="ed-shell" id="out-ed-shell">
                 <!-- Copy corner button -->
@@ -638,17 +572,13 @@
                 <!-- JSONEditor (Ace) injected here -->
                 <div id="out-je-wrap" aria-label="Formatted JSON output"></div>
               </div>
-
               <!-- Tree view -->
               <div class="tree-shell" id="tree-shell" hidden>
                 <div class="tree-view" id="tree-view" aria-label="JSON tree view" role="tree"></div>
               </div>
-
             </div><!-- /out-shells -->
           </div>
-
         </div><!-- /editors -->
-
         <!-- Status message row -->
         <div class="msg-row">
           <span class="w-spinner" id="w-spinner" aria-label="Processing"></span>
@@ -657,9 +587,7 @@
             <p>Paste your raw JSON, upload a file, or load the sample.</p>
           </div>
         </div>
-
       </div><!-- /panel-body -->
-
       <div class="statusbar">
         <div class="chip-row" aria-live="polite">
           <span class="chip">Lines: <strong id="lines-text">0</strong></span>
@@ -687,10 +615,8 @@
     </div>
   </section>
 </main>
-
 <!-- Hidden JSONEditor validation engine -->
 <div id="je-container" aria-hidden="true"></div>
-
 <!--
   JSONEditor JS — loaded synchronously so it's available when our
   main script block executes immediately below.
@@ -703,7 +629,6 @@
 function _workerFn() {
   'use strict';
   const enc = new TextEncoder();
-
   function fmtError(msg, raw) {
     try {
       const ff = msg.match(/line (\d+) column (\d+)/i);
@@ -718,7 +643,6 @@ function _workerFn() {
     } catch (_) {}
     return msg;
   }
-
   self.onmessage = function(ev) {
     const { id, op, raw, indent } = ev.data;
     try {
@@ -741,8 +665,6 @@ const _workerBlob = URL.createObjectURL(
 );
 const _w = new Worker(_workerBlob);
 URL.revokeObjectURL(_workerBlob);
-
-
 /* ═══════════════════════════════════════════════════════════════
    2. THEME TOGGLE
    ═══════════════════════════════════════════════════════════════ */
@@ -769,8 +691,6 @@ URL.revokeObjectURL(_workerBlob);
   });
   apply();
 })();
-
-
 /* ═══════════════════════════════════════════════════════════════
    3. MAIN EDITOR LOGIC
    ═══════════════════════════════════════════════════════════════ */
@@ -791,7 +711,6 @@ URL.revokeObjectURL(_workerBlob);
   const treeViewEl    = document.getElementById('tree-view');
   const treeShell     = document.getElementById('tree-shell');
   const outEdShell    = document.getElementById('out-ed-shell');
-  const treeActionsEl = document.getElementById('tree-actions');
   const viewRawBtn    = document.getElementById('view-raw');
   const viewTreeBtn   = document.getElementById('view-tree');
   /* Search */
@@ -802,7 +721,6 @@ URL.revokeObjectURL(_workerBlob);
   const searchPrev    = document.getElementById('search-prev');
   const searchNext    = document.getElementById('search-next');
   const searchClose   = document.getElementById('search-close');
-
   /* ── State ──────────────────────────────────────────────────── */
   let indent        = 2;
   let outputMode    = 'raw';
@@ -815,7 +733,6 @@ URL.revokeObjectURL(_workerBlob);
   const _toggleMap  = new Map();
   const _lnCache    = new WeakMap();
   const _enc        = new TextEncoder();
-
   /* Search state */
   let _searchOpen   = false;
   let _useRegex     = false;
@@ -824,15 +741,12 @@ URL.revokeObjectURL(_workerBlob);
   /* Tree search */
   let _treeMatches  = [];
   let _treeCurrent  = -1;
-
   /* ── JSONEditor setup ────────────────────────────────────────── */
   let _je     = null; /* hidden validation engine */
   let _aceOut = null; /* Ace editor (output) */
-
   if (typeof JSONEditor !== 'undefined') {
     /* Hidden text-mode engine for jsonlint error extraction */
     try { _je = new JSONEditor(document.getElementById('je-container'), { mode:'text' }); } catch (_) {}
-
     /* Code-mode (Ace) for the output panel */
     try {
       const jeOut = new JSONEditor(document.getElementById('out-je-wrap'), {
@@ -864,7 +778,6 @@ URL.revokeObjectURL(_workerBlob);
       }
     } catch (e) { console.warn('JSONEditor code mode init failed:', e); }
   }
-
   /* ── Sample ──────────────────────────────────────────────────── */
   const sample = {
     app:'JSON Beautifier', version:'2.0.0',
@@ -872,11 +785,9 @@ URL.revokeObjectURL(_workerBlob);
     hosting:{ platform:'GitHub', static:true },
     keyboard:{ beautify:'Ctrl+Enter', minify:'Ctrl+M', find:'Ctrl+F', clear:'Ctrl+Shift+X' }
   };
-
   /* ── Helpers ─────────────────────────────────────────────────── */
   const getBytes = t => t ? _enc.encode(t).length : 0;
   const getLines = t => t ? t.split('\n').length : 0;
-
   const updateLineNumbers = (textarea, target) => {
     const n = Math.max(1, textarea.value.split('\n').length);
     if (_lnCache.get(target) === n) return;
@@ -888,7 +799,6 @@ URL.revokeObjectURL(_workerBlob);
     const remW   = (Math.max(2, digits) * 0.7 + 0.8).toFixed(2);
     dropZone.style.setProperty('--gutter-w', remW + 'rem');
   };
-
   const setMsg = (title, body, state = 'idle') => {
     msgBox.dataset.state = state;
     msgBox.innerHTML = '';
@@ -896,13 +806,11 @@ URL.revokeObjectURL(_workerBlob);
     s.textContent = title; p.textContent = body;
     msgBox.append(s, p);
   };
-
   /* ── setOutput ───────────────────────────────────────────────── */
   const setOutput = (formatted) => {
     _lastFormatted = formatted;
     try { _lastParsed = JSON.parse(formatted); } catch { _lastParsed = null; }
     _treeContent   = '';   /* invalidate tree cache */
-
     if (_aceOut) {
       _aceOut.setReadOnly(false);
       _aceOut.setValue(formatted, -1);
@@ -912,17 +820,14 @@ URL.revokeObjectURL(_workerBlob);
       if (_searchOpen && searchInput.value) runSearchAce(false);
     }
     metaOut.textContent = formatted.length + ' chars';
-
     /* If tree view is active, re-render */
     if (outputMode === 'tree') _renderTree();
   };
-
   /* ── Worker handler ─────────────────────────────────────────── */
   _w.onmessage = ev => {
     const { id, ok, op, formatted, bytes, lines, message } = ev.data;
     if (id !== _pendingId) return;
     spinner.classList.remove('active');
-
     if (ok) {
       setOutput(formatted);
       linesEl.textContent = String(lines);
@@ -952,16 +857,13 @@ URL.revokeObjectURL(_workerBlob);
     spinner.classList.remove('active');
     setMsg('Worker error', e.message || 'Background processing failed.', 'err');
   };
-
   const dispatch = op => {
     if (!elIn.value.trim()) { setMsg('Empty', 'Paste JSON first.', 'err'); return; }
     spinner.classList.add('active');
     _w.postMessage({ id: ++_pendingId, op, raw: elIn.value, indent });
   };
-
   const beautify = () => dispatch('beautify');
   const minify   = () => dispatch('minify');
-
   const makeItReady = () => {
     clearTimeout(debTimer); _pendingId++;
     spinner.classList.remove('active');
@@ -974,7 +876,6 @@ URL.revokeObjectURL(_workerBlob);
     closeSearch();
     setMsg('Ready', 'Paste your raw JSON, upload a file, or load the sample.');
   };
-
   /* ── Clipboard ────────────────────────────────────────────────── */
   const legacyCopy = text => {
     const t = Object.assign(document.createElement('textarea'), { value:text, readOnly:true });
@@ -998,7 +899,6 @@ URL.revokeObjectURL(_workerBlob);
       }
     } catch (e) { setMsg('Paste failed', e.message || 'Clipboard access denied.', 'err'); }
   };
-
   /* ── Download ─────────────────────────────────────────────────── */
   const download = () => {
     if (!_lastFormatted) { setMsg('Nothing to download', 'Generate output first.', 'err'); return; }
@@ -1008,7 +908,6 @@ URL.revokeObjectURL(_workerBlob);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     setMsg('Download started', 'Your formatted JSON file is being saved.', 'ok');
   };
-
   /* ── File loading (auto-beautifies on upload) ─────────────────── */
   const loadFile = async file => {
     if (!file) return;
@@ -1021,22 +920,16 @@ URL.revokeObjectURL(_workerBlob);
       setMsg('File loaded', file.name + ' — formatting…', 'ok');
     } catch (e) { setMsg('Upload failed', e.message || 'Unable to read this file.', 'err'); }
   };
-
   const refreshMeta = () => {
     metaIn.textContent = elIn.value.length + ' chars';
     updateLineNumbers(elIn, lnIn);
   };
-
   /* ═══════════════════════════════════════════════════════════
-     TREE BUILDER  — lazy child rendering
-     Children with > LAZY_THRESHOLD siblings start collapsed
-     and are rendered on demand (first click to expand).
-     No size limit — even massive JSON loads instantly since
-     only the top-level nodes are in the DOM initially.
+     TREE BUILDER  — all nodes start collapsed, children
+     rendered lazily on first expand (no pagination).
+     Click a node to expand/collapse it individually.
+     Search auto-expands only matched nodes one at a time.
   ═══════════════════════════════════════════════════════════ */
-  const LAZY_THRESHOLD = 60;   /* nodes with >60 children start collapsed    */
-  const TREE_PAGE_SIZE = 100;  /* max children rendered per chunk            */
-
   const _typeOf = v => v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v;
   const _span   = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; return s; };
   const _punct  = ch => _span('json-punct', ch);
@@ -1046,29 +939,25 @@ URL.revokeObjectURL(_workerBlob);
     svg.setAttribute('viewBox','0 0 8 8'); path.setAttribute('d','M2 1.5 L6 4 L2 6.5 Z');
     svg.appendChild(path); return svg;
   };
-
   /**
    * _buildNode builds a tree node for `value`.
-   * For complex nodes (object/array) with > LAZY_THRESHOLD children,
-   * children are NOT rendered until the node is first expanded.
+   * All complex nodes (object/array) start collapsed.
+   * Children are NOT rendered until the node is first expanded.
    */
   const _buildNode = (value, key, isLast) => {
     const type      = _typeOf(value);
     const isComplex = type === 'object' || type === 'array';
     const node = document.createElement('div'); node.className = 'tn';
-    const row  = document.createElement('div'); row.className = isComplex ? 'tn-row clickable is-open' : 'tn-row';
-
+    const row  = document.createElement('div'); row.className = isComplex ? 'tn-row clickable is-closed' : 'tn-row';
     const tri = document.createElement('span'); tri.className = 'tn-toggle';
     if (isComplex) tri.appendChild(_caret());
     row.appendChild(tri);
-
     if (key !== null) {
       const ks = document.createElement('span');
       if (typeof key === 'number') { ks.className='json-index'; ks.textContent='['+key+']'; }
       else                         { ks.className='json-key';   ks.textContent='"'+key+'"'; }
       row.appendChild(ks); row.appendChild(_punct(': '));
     }
-
     if (!isComplex) {
       const vs = document.createElement('span');
       vs.className = type==='string'?'json-str':type==='number'?'json-num':type==='boolean'?'json-bool':'json-null';
@@ -1077,84 +966,42 @@ URL.revokeObjectURL(_workerBlob);
       if (!isLast) row.appendChild(_punct(','));
       node.appendChild(row); return node;
     }
-
     const isArr   = type === 'array';
     const entries = isArr ? value : Object.keys(value);
     const count   = entries.length;
     row.appendChild(_punct(isArr ? '[' : '{'));
-
     const summary = document.createElement('span'); summary.className = 'tn-summary';
     summary.textContent = count === 0 ? ' '+(isArr?']':'}')
       : isArr ? ' … ('+count+' items) ]' : ' … ('+count+' keys) }';
     row.appendChild(summary);
     node.appendChild(row);
-
     if (count === 0) {
       row.appendChild(_punct(isArr?']':'}')); if (!isLast) row.appendChild(_punct(','));
       return node;
     }
-
     const wrap  = document.createElement('div'); wrap.className = 'tn-children';
     const inner = document.createElement('div'); inner.className = 'tn-inner';
     const body  = document.createElement('div'); body.className  = 'tn-body';
-
-    /* ── Lazy + paginated rendering ──────────────────────────────
-       isLazy nodes (count > LAZY_THRESHOLD) start collapsed.
-       All nodes render children in chunks of TREE_PAGE_SIZE.
-       A "Show N more" button appears when there are remaining children.
-    ─────────────────────────────────────────────────────────── */
-    const isLazy      = count > LAZY_THRESHOLD;
-    let   rendered    = false;   /* first renderChunk not yet called  */
-    let   renderedCnt = 0;       /* how many children rendered so far */
-    let   collapsed   = isLazy;
-
-    /* Render one page of children, append "Show more" if needed */
-    const renderChunk = () => {
-      /* Remove stale "show more" button before appending next batch */
-      const prev = body.querySelector(':scope > .tn-more-btn');
-      if (prev) prev.remove();
-
-      const end  = Math.min(renderedCnt + TREE_PAGE_SIZE, count);
-      const frag = document.createDocumentFragment();
-      for (let idx = renderedCnt; idx < end; idx++) {
-        const item = entries[idx];
-        const ck   = isArr ? idx   : item;
-        const cv   = isArr ? item  : value[item];
-        frag.appendChild(_buildNode(cv, ck, idx === count - 1));
-      }
-      renderedCnt = end;
-
-      if (renderedCnt < count) {
-        const remaining = count - renderedCnt;
-        const showN     = Math.min(TREE_PAGE_SIZE, remaining);
-        const btn       = document.createElement('button');
-        btn.type        = 'button';
-        btn.className   = 'tn-more-btn';
-        btn.textContent = '▾  Show ' + showN + ' more  ·  ' + remaining + ' remaining';
-        btn.addEventListener('click', e => { e.stopPropagation(); renderChunk(); });
-        frag.appendChild(btn);
-      }
-      body.appendChild(frag);
-    };
-
-    /* renderChildren: idempotent first-call wrapper */
+    /* ── Lazy rendering ──────────────────────────────────────────
+       Children are NOT rendered until the node is first expanded.
+       On first expand, ALL children are rendered at once (no paging).
+    ──────────────────────────────────────────────────────────── */
+    let rendered  = false;
+    let collapsed = true;  /* always start collapsed */
+    /* Render all children at once — called once on first expand */
     const renderChildren = () => {
       if (rendered) return;
       rendered = true;
-      renderChunk();
+      const frag = document.createDocumentFragment();
+      for (let idx = 0; idx < count; idx++) {
+        const item = entries[idx];
+        const ck   = isArr ? idx  : item;
+        const cv   = isArr ? item : value[item];
+        frag.appendChild(_buildNode(cv, ck, idx === count - 1));
+      }
+      body.appendChild(frag);
     };
-
-    /* renderAll: used by expandAll — renders all pages at once */
-    const renderAll = () => {
-      if (!rendered) rendered = true;
-      while (renderedCnt < count) renderChunk();
-    };
-
-    /* Non-lazy nodes render their (small) first chunk immediately */
-    if (!isLazy) renderChildren();
-
     inner.appendChild(body);
-
     const closeRow = document.createElement('div'); closeRow.className = 'tn-row';
     const emptyTri = document.createElement('span'); emptyTri.className = 'tn-toggle';
     closeRow.appendChild(emptyTri);
@@ -1163,45 +1010,26 @@ URL.revokeObjectURL(_workerBlob);
     inner.appendChild(closeRow);
     wrap.appendChild(inner);
     node.appendChild(wrap);
-
-    /* Start lazy nodes collapsed */
-    if (collapsed) {
-      wrap.classList.add('collapsed');
-      row.classList.remove('is-open'); row.classList.add('is-closed');
-    }
-
+    /* All nodes start collapsed */
+    wrap.classList.add('collapsed');
     const doToggle = force => {
       collapsed = force !== undefined ? force : !collapsed;
-      if (!collapsed) {
-        /* expandAll (force === false) renders everything; normal click pages */
-        if (force === false) renderAll();
-        else                 renderChildren();
-      }
+      if (!collapsed) renderChildren();  /* render on first expand */
       wrap.classList.toggle('collapsed', collapsed);
       row.classList.toggle('is-open',   !collapsed);
       row.classList.toggle('is-closed',  collapsed);
     };
-
     const nodeId = _nodeIdCtr++;
     row.dataset.tnId = String(nodeId);
     _toggleMap.set(nodeId, doToggle);
     return node;
   };
-
   /* Delegated click listener — one handler for the entire tree */
   treeViewEl.addEventListener('click', e => {
     const r = e.target.closest('[data-tn-id]');
     if (!r) return;
     const fn = _toggleMap.get(Number(r.dataset.tnId)); if (fn) fn();
   });
-
-  /**
-   * expandAll: expands all nodes, including lazy ones.
-   * Rendered lazily on first expand, so DOM is built incrementally.
-   */
-  const collapseAll = () => _toggleMap.forEach(fn => fn(true));
-  const expandAll   = () => _toggleMap.forEach(fn => fn(false));
-
   /**
    * _renderTree: rebuilds the tree for the current formatted JSON.
    * Skipped if the tree is already showing the same content (state preserved).
@@ -1218,14 +1046,12 @@ URL.revokeObjectURL(_workerBlob);
     /* Re-apply tree search if open */
     if (_searchOpen && searchInput.value) runSearchTree(false);
   };
-
   const setViewMode = mode => {
     outputMode = mode;
     const isRaw = mode === 'raw';
-    outEdShell.hidden        = !isRaw;
-    treeShell.hidden         =  isRaw;
-    treeActionsEl.classList.toggle('visible', !isRaw);
-    viewRawBtn.setAttribute('aria-pressed',  String(isRaw));
+    outEdShell.hidden = !isRaw;
+    treeShell.hidden  =  isRaw;
+    viewRawBtn .setAttribute('aria-pressed', String(isRaw));
     viewTreeBtn.setAttribute('aria-pressed', String(!isRaw));
     if (isRaw) {
       /* Force Ace repaint after becoming visible */
@@ -1236,11 +1062,9 @@ URL.revokeObjectURL(_workerBlob);
       if (_searchOpen && searchInput.value) runSearchTree(false);
     }
   };
-
   /* ═══════════════════════════════════════════════════════════
      SEARCH ENGINE
   ═══════════════════════════════════════════════════════════ */
-
   const updateCount = () => {
     const total   = outputMode === 'raw' ? _aceTotal   : _treeMatches.length;
     const current = outputMode === 'raw' ? _aceCurrent : (_treeCurrent + 1);
@@ -1258,7 +1082,6 @@ URL.revokeObjectURL(_workerBlob);
       searchPrev.disabled = searchNext.disabled = false;
     }
   };
-
   /* ── Ace (raw view) search ─────────────────────────────────── */
   /**
    * Uses Ace's session.highlight() to mark all matches (orange glow),
@@ -1270,15 +1093,12 @@ URL.revokeObjectURL(_workerBlob);
   const runSearchAce = (jump = true) => {
     searchInput.classList.remove('bad-regex');
     _aceTotal = _aceCurrent = 0;
-
     if (!_aceOut) { updateCount(); return; }
     const q = searchInput.value;
-
     if (!q) {
       _aceOut.session.highlight(null);
       updateCount(); return;
     }
-
     let pattern;
     if (_useRegex) {
       try { pattern = new RegExp(q, 'gi'); }
@@ -1286,11 +1106,9 @@ URL.revokeObjectURL(_workerBlob);
     } else {
       pattern = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     }
-
     /* Count and highlight all matches */
     const text = _aceOut.getValue();
     _aceTotal = (text.match(pattern) || []).length;
-
     if (_aceTotal > 0) {
       _aceOut.session.highlight(pattern);
       if (jump) {
@@ -1302,16 +1120,13 @@ URL.revokeObjectURL(_workerBlob);
     }
     updateCount();
   };
-
   const navSearchAce = dir => {
     if (!_aceTotal || !_aceOut) return;
     if (dir > 0) { _aceOut.findNext({ wrap:true }); _aceCurrent = _aceCurrent < _aceTotal ? _aceCurrent + 1 : 1; }
     else         { _aceOut.findPrevious({ wrap:true }); _aceCurrent = _aceCurrent > 1 ? _aceCurrent - 1 : _aceTotal; }
     updateCount();
   };
-
   /* ── Tree search (data-driven, expand-on-navigate) ─────────── */
-
   /*
    * Text representation of a tree row — mirrors exactly what the DOM renders,
    * so pattern-matching here is equivalent to matching against row.textContent.
@@ -1327,7 +1142,6 @@ URL.revokeObjectURL(_workerBlob);
     else                                vStr = '{ … (' + Object.keys(value).length + ' keys) }';
     return kStr + vStr;
   };
-
   /*
    * Walk data recursively. For each child whose row-text matches, push
    * its path (array of keys/indices) onto results. Does NOT touch the DOM.
@@ -1345,58 +1159,42 @@ URL.revokeObjectURL(_workerBlob);
       if (v !== null && typeof v === 'object') _collectMatchPaths(v, pattern, childPath, results);
     }
   };
-
   /*
    * Given a path (e.g. ['users', 0, 'name']), expand ONLY the ancestor
-   * nodes that are currently collapsed — using renderChildren (first page),
-   * NOT renderAll — then page through just enough chunks to find the target
-   * child. Returns the .tn-row element for the leaf, or null.
+   * nodes needed to reveal the target — using renderChildren (all children
+   * at once). Returns the .tn-row element for the leaf, or null.
    */
   const _revealPath = path => {
     const rootTn = treeViewEl.querySelector(':scope > .tn');
     if (!rootTn) return null;
     if (path.length === 0) return rootTn.querySelector(':scope > .tn-row');
-
     let currentTn = rootTn;
     for (let depth = 0; depth < path.length; depth++) {
       const seg = path[depth];
-
-      /* Only expand if visually collapsed — fn() toggles open + renderChildren (first page).
-         Never call fn(false) here: that triggers renderAll which blows open everything. */
+      /* Expand if currently collapsed — renderChildren fires automatically via doToggle */
       const tnChildren = currentTn.querySelector(':scope > .tn-children');
       if (tnChildren && tnChildren.classList.contains('collapsed')) {
         const headerRow = currentTn.querySelector(':scope > .tn-row[data-tn-id]');
         if (headerRow) {
           const fn = _toggleMap.get(Number(headerRow.dataset.tnId));
-          if (fn) fn(); /* expand + renderChildren only */
+          if (fn) fn(); /* expand + render all children */
         }
       }
-
       const body = currentTn.querySelector(':scope > .tn-children > .tn-inner > .tn-body');
       if (!body) return null;
-
-      /* Page through just enough chunks until target child appears */
+      /* Find target child (all children are now rendered) */
       const wantText = typeof seg === 'number' ? '[' + seg + ']' : '"' + seg + '"';
       let found = null;
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        for (const child of body.querySelectorAll(':scope > .tn')) {
-          const keySpan = child.querySelector(':scope > .tn-row > .json-key, :scope > .tn-row > .json-index');
-          if (keySpan && keySpan.textContent === wantText) { found = child; break; }
-        }
-        if (found) break;
-        const moreBtn = body.querySelector(':scope > .tn-more-btn');
-        if (!moreBtn) break; /* target not found in this body */
-        moreBtn.click();
+      for (const child of body.querySelectorAll(':scope > .tn')) {
+        const keySpan = child.querySelector(':scope > .tn-row > .json-key, :scope > .tn-row > .json-index');
+        if (keySpan && keySpan.textContent === wantText) { found = child; break; }
       }
-
       if (!found) return null;
       if (depth === path.length - 1) return found.querySelector(':scope > .tn-row');
       currentTn = found;
     }
     return null;
   };
-
   /* Clear old highlights, reveal + highlight the match at index idx. */
   const _revealAndHighlight = idx => {
     treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh', 'active'));
@@ -1407,15 +1205,12 @@ URL.revokeObjectURL(_workerBlob);
     row.classList.add('tree-sh', 'active');
     row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   };
-
   const runSearchTree = (jump = true) => {
     treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh', 'active'));
     _treeMatches = []; _treeCurrent = -1;
     searchInput.classList.remove('bad-regex');
-
     const q = searchInput.value;
     if (!q) { updateCount(); return; }
-
     let pattern;
     if (_useRegex) {
       try { pattern = new RegExp(q, 'gi'); }
@@ -1423,37 +1218,30 @@ URL.revokeObjectURL(_workerBlob);
     } else {
       pattern = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     }
-
     if (!_lastParsed) { updateCount(); return; }
-
     /* Walk the data — zero DOM expansion, finds matches in collapsed nodes too */
     _collectMatchPaths(_lastParsed, pattern, [], _treeMatches);
-
     updateCount();
     if (_treeMatches.length && jump) {
       _treeCurrent = 0;
       _revealAndHighlight(0);
     }
   };
-
   const navSearchTree = dir => {
     if (!_treeMatches.length) return;
     _treeCurrent = ((_treeCurrent + dir) % _treeMatches.length + _treeMatches.length) % _treeMatches.length;
     _revealAndHighlight(_treeCurrent);
     updateCount();
   };
-
   /* ── Unified search / nav ─────────────────────────────────── */
   const runSearch = () => outputMode === 'raw' ? runSearchAce()  : runSearchTree();
   const navSearch = dir => outputMode === 'raw' ? navSearchAce(dir) : navSearchTree(dir);
-
   const openSearch = () => {
     _searchOpen = true;
     searchBar.removeAttribute('hidden');
     searchInput.focus(); searchInput.select();
     if (searchInput.value) runSearch();
   };
-
   const closeSearch = () => {
     if (!_searchOpen) return;
     _searchOpen = false; _treeMatches = []; _treeCurrent = -1; _aceTotal = _aceCurrent = 0;
@@ -1463,20 +1251,17 @@ URL.revokeObjectURL(_workerBlob);
     if (_aceOut) _aceOut.session.highlight(null);
     treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh','active'));
   };
-
   /* ── Indent selector ─────────────────────────────────────── */
   indentSelect.addEventListener('change', () => {
     const v = indentSelect.value;
     indent = v === 'tab' ? '\t' : Number(v);
     if (_lastFormatted) beautify();
   });
-
   /* ── Debounced auto-beautify ──────────────────────────────── */
   const debouncedBeautify = () => {
     clearTimeout(debTimer);
     debTimer = setTimeout(() => { if (elIn.value.trim()) beautify(); }, 300);
   };
-
   /* ── Button listeners ────────────────────────────────────── */
   document.getElementById('btn-beautify')   .addEventListener('click', beautify);
   document.getElementById('btn-minify')     .addEventListener('click', minify);
@@ -1490,11 +1275,8 @@ URL.revokeObjectURL(_workerBlob);
   });
   viewRawBtn .addEventListener('click', () => setViewMode('raw'));
   viewTreeBtn.addEventListener('click', () => setViewMode('tree'));
-  document.getElementById('btn-expand-all')  .addEventListener('click', expandAll);
-  document.getElementById('btn-collapse-all').addEventListener('click', collapseAll);
   btnUpload.addEventListener('click', () => fileIn.click());
   fileIn.addEventListener('change', ev => { loadFile(ev.target.files[0]); fileIn.value = ''; });
-
   /* ── Search listeners ────────────────────────────────────── */
   searchInput.addEventListener('input', () => { _aceCurrent = _treeCurrent = 0; runSearch(); });
   searchInput.addEventListener('keydown', e => {
@@ -1511,14 +1293,12 @@ URL.revokeObjectURL(_workerBlob);
   searchPrev .addEventListener('click', () => navSearch(-1));
   searchNext .addEventListener('click', () => navSearch(1));
   searchClose.addEventListener('click', closeSearch);
-
   /* ── Input events ────────────────────────────────────────── */
   elIn.addEventListener('input', () => {
     refreshMeta();
     if (!elIn.value.trim()) { clearTimeout(debTimer); makeItReady(); }
     else debouncedBeautify();
   });
-
   elIn.addEventListener('keydown', e => {
     if (e.key !== 'Tab') return;
     e.preventDefault();
@@ -1529,9 +1309,7 @@ URL.revokeObjectURL(_workerBlob);
     refreshMeta();
     if (elIn.value.trim()) debouncedBeautify();
   });
-
   elIn.addEventListener('scroll', () => { lnIn.scrollTop = elIn.scrollTop; });
-
   /* ── Drag-and-drop ───────────────────────────────────────── */
   dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.outline='2px dashed var(--color-primary)'; });
   dropZone.addEventListener('dragleave', () => { dropZone.style.outline=''; });
@@ -1539,7 +1317,6 @@ URL.revokeObjectURL(_workerBlob);
     e.preventDefault(); dropZone.style.outline='';
     const f = e.dataTransfer.files[0]; if (f) loadFile(f);
   });
-
   /* ── Global keyboard shortcuts ──────────────────────────── */
   document.addEventListener('keydown', e => {
     const ctrl = e.ctrlKey || e.metaKey;
@@ -1552,12 +1329,10 @@ URL.revokeObjectURL(_workerBlob);
     if (ctrl && e.shiftKey && e.key.toLowerCase()==='c') { e.preventDefault(); copyOut(); return; }
     if (ctrl && e.shiftKey && e.key.toLowerCase()==='x') { e.preventDefault(); makeItReady(); return; }
   });
-
   /* ── Initial state ───────────────────────────────────────── */
   refreshMeta();
   setMsg('Ready', 'Paste your raw JSON, upload a file, or load the sample.');
   elIn.focus();
-
 })();
 </script>
 </body>
