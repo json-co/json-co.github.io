@@ -1031,16 +1031,16 @@ URL.revokeObjectURL(_workerBlob);
     outputMode=mode;
     const isRaw=mode==='raw';
     outEdShell.hidden=!isRaw;
-    treeShell.hidden = isRaw;
-    viewRawBtn .setAttribute('aria-pressed',String(isRaw));
+    treeShell.hidden=isRaw;
+    viewRawBtn.setAttribute('aria-pressed',String(isRaw));
     viewTreeBtn.setAttribute('aria-pressed',String(!isRaw));
     if(isRaw){
       if(_aceOut) setTimeout(()=>_aceOut.resize(true),0);
       if(_searchOpen&&searchInput.value) runSearchAce(false);
-    }} else {
-      requestAnimationFrame(() => {
+    } else {
+      requestAnimationFrame(()=>{
         _renderTree();
-        if (_searchOpen && searchInput.value) runSearchTree(false);
+        if(_searchOpen&&searchInput.value) runSearchTree(false);
       });
     }
   };
