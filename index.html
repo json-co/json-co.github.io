@@ -208,10 +208,8 @@
     /* Sit at top-right of their shell; radius matches shell corner */
     .pane-btn {
       position:absolute; top:10px; right:10px; z-index:15;
-  
       display:grid; place-items:center;
       color:var(--color-text-faint);
-      background:var(--color-surface-offset);
       border-radius:0 var(--radius-lg) 0 var(--radius-md);
       border:none; cursor:pointer;
       transition:color var(--trans), background var(--trans);
@@ -936,7 +934,6 @@ URL.revokeObjectURL(_workerBlob);
           : 'All unnecessary whitespace removed.',
         'ok'
       );
-      collapseAll();
     } else {
       /* Try jsonlint for a better error message */
       let msg = message;
@@ -1220,7 +1217,6 @@ URL.revokeObjectURL(_workerBlob);
     catch (e) { console.error('Tree render failed:', e); treeViewEl.textContent = 'Render error — see console.'; }
     /* Re-apply tree search if open */
     if (_searchOpen && searchInput.value) runSearchTree(false);
-    collapseAll();
   };
 
   const setViewMode = mode => {
