@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,12 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/c/c9/JSON_vector_logo.svg">
   <link rel="alternate icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/160px-JSON_vector_logo.svg.png">
-  <!--
-    JSONEditor CSS.
-    We use JSONEditor's code mode (Ace editor) for the output panel —
-    virtualised rendering means the UI stays smooth on any file size.
-    We also keep a hidden text-mode instance as a jsonlint validation engine.
-  -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.4/jsoneditor.min.css" />
   <!-- Anti-FOUC theme -->
   <script>
@@ -108,13 +103,15 @@
     /* ── Utilities ────────────────────────────────────────────── */
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border-width:0; }
     .wrap { max-width:1710px; margin-inline:auto; padding-inline:1rem; }
-    /* ── Top bar ──────────────────────────────────────────────── */
+    /* ── Top bar — backdrop-filter removed; a solid surface colour +
+       border is visually equivalent and costs nothing on the GPU.   */
     .topbar {
       position:sticky; top:0; z-index:80;
-      backdrop-filter:blur(18px) saturate(160%);
-      background:rgba(248,247,244,.82); border-bottom:1px solid var(--color-border);
+      background:var(--color-surface);
+      border-bottom:1px solid var(--color-border);
+      box-shadow:var(--shadow-sm);
     }
-    [data-theme="dark"] .topbar { background:rgba(22,22,20,.82); }
+    [data-theme="dark"] .topbar { background:var(--color-surface); }
     .topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); padding-block:var(--space-3); min-height:4.5rem; }
     .header-brand { display:flex; align-items:center; gap:.75rem; text-decoration:none; color:inherit; min-width:0; }
     .brand-logo-wrap { display:grid; place-items:center; flex:none; }
@@ -135,12 +132,14 @@
     /* ── Main layout ──────────────────────────────────────────── */
     main { padding-top:var(--space-4); padding-bottom:var(--space-4); }
     .workspace { display:grid; gap:var(--space-4); }
+    /* backdrop-filter removed from panel for the same reason */
     .panel {
-      background:rgba(248,247,244,.9); border:1px solid var(--color-border);
+      background:var(--color-surface);
+      border:1px solid var(--color-border);
       border-radius:var(--radius-xl); box-shadow:var(--shadow-md);
-      overflow:clip; backdrop-filter:blur(10px); min-width:0;
+      overflow:clip; min-width:0;
     }
-    [data-theme="dark"] .panel { background:rgba(22,22,20,.9); }
+    [data-theme="dark"] .panel { background:var(--color-surface); }
     .panel-body { padding:var(--space-5); display:grid; gap:var(--space-2); padding-bottom:var(--space-2); }
     /* ── Toolbar / Buttons ────────────────────────────────────── */
     .toolbar { display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; align-items:center; }
@@ -168,33 +167,8 @@
       background:var(--color-surface-2); box-shadow:var(--shadow-inset);
       min-height:calc(100vh - 270px); height:calc(100vh - 270px);
     }
-    /* Input gutter — width driven by --gutter-w so JS can expand it for 10k+ lines */
-    .ed-shell.has-gutter::before {
-      content:""; position:absolute; inset:0 auto 0 0; width:var(--gutter-w, 3.4rem);
-      background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface));
-      border-right:1px solid var(--color-border); pointer-events:none; z-index:3;
-    }
-    .line-nums {
-      position:absolute; top:0; left:0; width:var(--gutter-w, 3.4rem); height:100%;
-      padding:var(--space-4) var(--space-2);
-      font-family:var(--font-mono); font-size:.78rem;
-      line-height:calc(0.92rem * 1.65); color:var(--color-text-faint);
-      text-align:right; user-select:none; white-space:pre;
-      overflow:hidden; pointer-events:none; z-index:4;
-    }
-    textarea {
-      display:block; width:100%; height:100%;
-      resize:none; border:none; background:transparent;
-      padding:var(--space-4) var(--space-4) var(--space-4) calc(var(--gutter-w, 3.4rem) + 0.7rem);
-      font-family:var(--font-mono); font-size:.92rem; line-height:1.65;
-      color:var(--color-text); tab-size:2; white-space:pre; overflow:auto;
-      caret-color:var(--color-primary); position:relative; z-index:2;
-    }
-    textarea:focus { outline:none; }
-    textarea::placeholder { color:var(--color-text-faint); }
     .hidden-file { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-    /* ── Pane corner action buttons (paste/copy badges) ─────── */
-    /* Sit at top-right of their shell; radius matches shell corner */
+    /* ── Pane corner action buttons ─────────────────────────── */
     .pane-btn {
       position:absolute; top:10px; right:10px; z-index:15;
       display:grid; place-items:center;
@@ -203,7 +177,7 @@
       border:none; cursor:pointer;
       transition:color var(--trans), background var(--trans);
     }
-    .pane-btn:hover { color:var(--color-primary); background:var(--color-surface-dynamic); }
+    .pane-btn:hover { color:var(--color-primary);}
     /* ── Message box ──────────────────────────────────────────── */
     .msg-row  { display:flex; align-items:center; gap:var(--space-2); }
     .msg-box  { display:flex; align-items:center; gap:var(--space-2); flex:1; transition:color var(--trans); }
@@ -214,7 +188,6 @@
     .msg-box p { font-size:var(--text-xs); margin:0; color:var(--color-text-muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .msg-box[data-state="ok"]  p,
     .msg-box[data-state="err"] p { color:inherit; opacity:.8; }
-    /* Worker spinner */
     .w-spinner { width:.8rem; height:.8rem; flex:none; border:1.5px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; }
     .w-spinner:not(.active) { display:none; }
     .w-spinner.active { display:block; animation:wspin .65s linear infinite; }
@@ -262,8 +235,7 @@
       min-height:calc(100vh - 270px); height:calc(100vh - 270px);
     }
     .tree-view { padding:var(--space-3) var(--space-4) var(--space-3) var(--space-5); font-family:var(--font-mono); font-size:.92rem; min-width:max-content; }
-    /* Tree nodes */
-    .tn { display:block; }
+    .tn { display:block; contain:layout style; padding-right: 1.5px; }
     .tn-row { display:flex; align-items:center; gap:.25em; padding:.06em 3px; border-radius:var(--radius-sm); margin:0 -3px; white-space:nowrap; }
     .tn-row:hover { background:var(--color-surface-offset); }
     .tn-row.clickable { cursor:pointer; }
@@ -272,39 +244,33 @@
     .tn-row.clickable:hover .tn-toggle { color:var(--color-primary); }
     .tn-row.is-open   .tn-toggle svg { transform:rotate(90deg); }
     .tn-row.is-closed .tn-toggle svg { transform:rotate(0deg); }
-    .tn-children { display:grid; grid-template-rows:1fr; overflow:hidden; transition:grid-template-rows 180ms ease; }
-    .tn-children.collapsed { grid-template-rows:0fr; }
-    .tn-inner { min-height:0; }
-    .tn-body { padding-left:1.35rem; position:relative; padding-right: 1.5px;}
+    .tn-children { overflow:hidden; transform-origin:top; transition:transform 180ms ease; will-change:transform; }
+    /* .tn-children.collapsed — height/transform managed by JS doToggle */
+    .tn-inner {}
+    .tn-body { padding-left:1.35rem; position:relative; padding-right:1.5px; }
     .tn-body::before { content:""; position:absolute; left:.52rem; top:0; bottom:.4rem; width:1px; background:var(--color-divider); border-radius:1px; }
     .tn-summary { display:none; color:var(--color-text-faint); font-style:italic; font-size:.86em; }
     .tn-row.is-closed .tn-summary { display:inline; }
     .json-index { color:var(--color-primary); font-weight:600; font-size:.86em; }
-    /* Token colours */
     .json-key  { color:#0a6a70; font-weight:600; } .json-str  { color:#b45309; }
     .json-num  { color:#7c3aed; } .json-bool { color:#1d4ed8; }
     .json-null { color:#9c2973; } .json-punct{ color:#69655e; }
     [data-theme="dark"] .json-key  { color:#5dbcc4; } [data-theme="dark"] .json-str  { color:#f59e0b; }
     [data-theme="dark"] .json-num  { color:#a78bfa; } [data-theme="dark"] .json-bool { color:#60a5fa; }
     [data-theme="dark"] .json-null { color:#de79b8; } [data-theme="dark"] .json-punct{ color:#ada8a0; }
-    /* Tree search highlight */
     .tn-row.tree-sh        { background:rgba(234,179,8,.18); border-radius:var(--radius-sm); }
     .tn-row.tree-sh.active { background:rgba(234,179,8,.42); outline:1px solid rgba(234,179,8,.65); }
     [data-theme="dark"] .tn-row.tree-sh        { background:rgba(234,179,8,.1); }
     [data-theme="dark"] .tn-row.tree-sh.active { background:rgba(234,179,8,.3); }
-    /* ── Search overlay — floats above the editor, no layout impact ── */
-    /* Opened with Ctrl+F; absolutely positioned inside .out-shells      */
+    /* ── Search overlay ──────────────────────────────────────── */
     .out-shells { position:relative; }
     .search-overlay {
       position:absolute; top:0; left:0; right:0; z-index:30;
       display:flex; align-items:center; gap:var(--space-1);
-      padding:.3rem var(--space-3);
-      min-height:2.2rem;
-      background:var(--color-surface-2);
-      border:1px solid var(--color-border);
+      padding:.3rem var(--space-3); min-height:2.2rem;
+      background:var(--color-surface-2); border:1px solid var(--color-border);
       border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-      box-shadow:var(--shadow-sm);
-      animation:sb-in 160ms cubic-bezier(.16,1,.3,1);
+      box-shadow:var(--shadow-sm); animation:sb-in 160ms cubic-bezier(.16,1,.3,1);
     }
     @keyframes sb-in { from { opacity:0; transform:translateY(-4px); } }
     .search-overlay[hidden] { display:none !important; }
@@ -319,11 +285,7 @@
     .search-input::placeholder { color:var(--color-text-faint); font-size:.76rem; }
     .search-input.bad-regex { color:var(--color-error); }
     .search-sep { width:1px; height:14px; background:var(--color-border); flex:none; margin-inline:3px; }
-    .search-count {
-      font-size:.72rem; color:var(--color-text-faint); white-space:nowrap;
-      min-width:3rem; text-align:right; font-variant-numeric:tabular-nums;
-      padding-right:1px; letter-spacing:.01em;
-    }
+    .search-count { font-size:.72rem; color:var(--color-text-faint); white-space:nowrap; min-width:3rem; text-align:right; font-variant-numeric:tabular-nums; padding-right:1px; letter-spacing:.01em; }
     .search-count.has-results { color:var(--color-text-muted); }
     .search-count.no-results  { color:var(--color-error); }
     .search-toggle {
@@ -334,117 +296,76 @@
       background:transparent; cursor:pointer; transition:all var(--trans); flex:none;
     }
     .search-toggle:hover { background:var(--color-surface-offset); color:var(--color-text); }
-    .search-toggle[aria-pressed="true"] {
-      background:rgba(10,106,112,.13); color:var(--color-primary);
-      border-color:rgba(10,106,112,.28);
-    }
-    [data-theme="dark"] .search-toggle[aria-pressed="true"] {
-      background:rgba(93,188,196,.15); border-color:rgba(93,188,196,.3);
-    }
-    .search-nav-btn {
-      width:1.55rem; height:1.55rem; border-radius:var(--radius-sm);
-      display:grid; place-items:center;
-      color:var(--color-text-muted); border:none; background:transparent;
-      cursor:pointer; transition:all var(--trans); flex:none;
-    }
+    .search-toggle[aria-pressed="true"] { background:rgba(10,106,112,.13); color:var(--color-primary); border-color:rgba(10,106,112,.28); }
+    [data-theme="dark"] .search-toggle[aria-pressed="true"] { background:rgba(93,188,196,.15); border-color:rgba(93,188,196,.3); }
+    .search-nav-btn { width:1.55rem; height:1.55rem; border-radius:var(--radius-sm); display:grid; place-items:center; color:var(--color-text-muted); border:none; background:transparent; cursor:pointer; transition:all var(--trans); flex:none; }
     .search-nav-btn:hover:not(:disabled) { background:var(--color-surface-offset); color:var(--color-text); }
     .search-nav-btn:disabled { opacity:.28; cursor:default; }
-    .search-close-btn {
-      width:1.55rem; height:1.55rem; border-radius:var(--radius-sm);
-      display:grid; place-items:center;
-      color:var(--color-text-faint); border:none; background:transparent;
-      cursor:pointer; transition:all var(--trans); flex:none;
-    }
+    .search-close-btn { width:1.55rem; height:1.55rem; border-radius:var(--radius-sm); display:grid; place-items:center; color:var(--color-text-faint); border:none; background:transparent; cursor:pointer; transition:all var(--trans); flex:none; }
     .search-close-btn:hover { background:rgba(192,21,42,.1); color:var(--color-error); }
     [data-theme="dark"] .search-close-btn:hover { background:rgba(248,113,113,.1); color:var(--color-error); }
     /* ── Custom scrollbars ───────────────────────────────────── */
-    /* WebKit (Chrome, Safari, Edge) */
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--color-divider); border-radius:9999px; }
     ::-webkit-scrollbar-thumb:hover { background:var(--color-text-faint); }
     ::-webkit-scrollbar-corner { background:transparent; }
-    /* Firefox */
     html { scrollbar-width:thin; scrollbar-color:var(--color-divider) transparent; }
-    /* ── JSONEditor / Ace output overrides ────────────────────── */
-    /* Strip all JSONEditor chrome — we keep only the Ace code pane */
-    #out-je-wrap { position:absolute; inset:0; }
-    #out-je-wrap .jsoneditor,
-    #out-je-wrap .jsoneditor-outer { border:none !important; height:100% !important; border-radius:0 !important; }
-    #out-je-wrap .jsoneditor-menu,
-    #out-je-wrap .jsoneditor-statusbar,
-    #out-je-wrap .jsoneditor-navigation-bar,
-    #out-je-wrap .jsoneditor-modes,
-    #out-je-wrap .jsoneditor-search { display:none !important; }
-    #out-je-wrap .jsoneditor-code { height:100% !important; padding:0 !important; }
-    /* Ace base */
-    #out-je-wrap .ace_editor {
-      font-family:var(--font-mono) !important; font-size:.92rem !important;
-      line-height:1.65 !important; background:transparent !important;
-    }
-    #out-je-wrap .ace_scroller { background:var(--color-surface-2) !important; }
-    #out-je-wrap .ace_content,
-    #out-je-wrap .ace_text-layer { background:transparent !important; color:var(--color-text) !important; }
-    #out-je-wrap .ace_layer { font-family:var(--font-mono) !important; }
-    /* Gutter */
-    #out-je-wrap .ace_gutter {
-      background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface)) !important;
-      color:var(--color-text-faint) !important;
-      border-right:1px solid var(--color-border) !important;
-    }
-    #out-je-wrap .ace_gutter-cell { padding-right:8px !important; font-size:.78rem !important; }
-    #out-je-wrap .ace_gutter-active-line { background:transparent !important; }
-    /* Active line, selection, cursor */
-    #out-je-wrap .ace_active-line { background:rgba(10,106,112,.04) !important; }
-    #out-je-wrap .ace_selection   { background:rgba(10,106,112,.18) !important; }
-    #out-je-wrap .ace_cursor      { display:none !important; }    /* read-only: hide cursor */
-    /* Ace search highlights (findAll / find uses these) */
-    #out-je-wrap .ace_highlight-marker { background:rgba(234,179,8,.35) !important; border-radius:2px; }
-    #out-je-wrap .ace_selected-word    { border: none; outline:1px solid rgba(94, 188, 196, .3); }
-    /* JSON syntax tokens — light */
-    #out-je-wrap .ace_variable                   { color:#0a6a70 !important; font-weight:600 !important; }
-    #out-je-wrap .ace_string                     { color:#b45309 !important; }
-    #out-je-wrap .ace_constant.ace_numeric        { color:#7c3aed !important; }
-    #out-je-wrap .ace_constant.ace_language       { color:#1d4ed8 !important; }
-    #out-je-wrap .ace_paren,
-    #out-je-wrap .ace_punctuation,
-    #out-je-wrap .ace_keyword.ace_operator        { color:#69655e !important; }
-    /* JSON syntax tokens — dark */
-    [data-theme="dark"] #out-je-wrap .ace_scroller { background:var(--color-surface-2) !important; }
-    [data-theme="dark"] #out-je-wrap .ace_gutter   {
-      background:linear-gradient(180deg,#222120,#1c1b19) !important;
-      border-right-color:rgba(255,255,255,.1) !important;
-    }
-    [data-theme="dark"] #out-je-wrap .ace_text-layer    { color:var(--color-text) !important; }
-    [data-theme="dark"] #out-je-wrap .ace_active-line   { background:rgba(93,188,196,.04) !important; }
-    [data-theme="dark"] #out-je-wrap .ace_selection     { background:rgba(93,188,196,.15) !important; }
-    [data-theme="dark"] #out-je-wrap .ace_variable      { color:#5dbcc4 !important; font-weight:600 !important; }
-    [data-theme="dark"] #out-je-wrap .ace_string        { color:#f59e0b !important; }
-    [data-theme="dark"] #out-je-wrap .ace_constant.ace_numeric  { color:#a78bfa !important; }
-    [data-theme="dark"] #out-je-wrap .ace_constant.ace_language { color:#60a5fa !important; }
-    [data-theme="dark"] #out-je-wrap .ace_paren,
-    [data-theme="dark"] #out-je-wrap .ace_punctuation,
-    [data-theme="dark"] #out-je-wrap .ace_keyword.ace_operator  { color:#ada8a0 !important; }
-    /* Indent guides — replace Ace's default dotted PNG with a clean design-token line */
-    #out-je-wrap .ace_indent-guide {
-      background: none !important;
-      border-right: 1px solid var(--color-border) !important;
-      margin-right: -1px !important;
-      visibility: hidden;
-    }
-    .ace_fold-widget, .ace_bracket {
-      display: none !important;
-    }
-
-    [data-theme="dark"] #out-je-wrap .ace_indent-guide {
-      border-right-color: rgba(255,255,255,.07) !important;
-    }
-    /* Ace scrollbar — transparent bg so the shell bg shows through */
-    #out-je-wrap .ace_scrollbar { transition:opacity .2s; background:transparent !important; }
-    #out-je-wrap .ace_scrollbar::-webkit-scrollbar { width:5px; height:5px; }
-    #out-je-wrap .ace_scrollbar::-webkit-scrollbar-track { background:transparent; }
-    #out-je-wrap .ace_scrollbar::-webkit-scrollbar-thumb { background:var(--color-divider); border-radius:9999px; }
-    #out-je-wrap .ace_scrollbar::-webkit-scrollbar-thumb:hover { background:var(--color-text-faint); }
+    /* ═══════════════════════════════════════════════════════════
+       Shared Ace-pane rules (.ace-pane on both #in-je-wrap and
+       #out-je-wrap).  Using a single class halves the rule-set
+       compared to per-ID selectors.
+    ═══════════════════════════════════════════════════════════ */
+    .ace-pane { position:absolute; inset:0; }
+    .ace-pane .jsoneditor,
+    .ace-pane .jsoneditor-outer { border:none !important; height:100% !important; border-radius:0 !important; }
+    .ace-pane .jsoneditor-menu,
+    .ace-pane .jsoneditor-statusbar,
+    .ace-pane .jsoneditor-navigation-bar,
+    .ace-pane .jsoneditor-modes,
+    .ace-pane .jsoneditor-search { display:none !important; }
+    .ace-pane .jsoneditor-code { height:100% !important; padding:0 !important; }
+    .ace-pane .ace_editor { font-family:var(--font-mono) !important; font-size:.92rem !important; line-height:1.65 !important; background:transparent !important; }
+    .ace-pane .ace_scroller { background:var(--color-surface-2) !important; }
+    .ace-pane .ace_content, .ace-pane .ace_text-layer { background:transparent !important; color:var(--color-text) !important; }
+    .ace-pane .ace_layer { font-family:var(--font-mono) !important; }
+    .ace-pane .ace_gutter { background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface)) !important; color:var(--color-text-faint) !important; border-right:1px solid var(--color-border) !important; }
+    .ace-pane .ace_gutter-cell { padding-right:8px !important; font-size:.78rem !important; }
+    .ace-pane .ace_gutter-active-line { background:transparent !important; }
+    .ace-pane .ace_active-line { background:rgba(10,106,112,.04) !important; }
+    .ace-pane .ace_selection   { background:rgba(10,106,112,.18) !important; }
+    .ace-pane .ace_highlight-marker { background:rgba(234,179,8,.35) !important; border-radius:2px; }
+    .ace-pane .ace_selected-word    { border:none; outline:1px solid rgba(94,188,196,.3); }
+    /* JSON tokens — light */
+    .ace-pane .ace_variable                  { color:#0a6a70 !important; font-weight:600 !important; }
+    .ace-pane .ace_string                    { color:#b45309 !important; }
+    .ace-pane .ace_constant.ace_numeric       { color:#7c3aed !important; }
+    .ace-pane .ace_constant.ace_language      { color:#1d4ed8 !important; }
+    .ace-pane .ace_paren, .ace-pane .ace_punctuation, .ace-pane .ace_keyword.ace_operator { color:#69655e !important; }
+    /* JSON tokens — dark */
+    [data-theme="dark"] .ace-pane .ace_scroller { background:var(--color-surface-2) !important; }
+    [data-theme="dark"] .ace-pane .ace_gutter { background:linear-gradient(180deg,#222120,#1c1b19) !important; border-right-color:rgba(255,255,255,.1) !important; }
+    [data-theme="dark"] .ace-pane .ace_text-layer  { color:var(--color-text) !important; }
+    [data-theme="dark"] .ace-pane .ace_active-line { background:rgba(93,188,196,.04) !important; }
+    [data-theme="dark"] .ace-pane .ace_selection   { background:rgba(93,188,196,.15) !important; }
+    [data-theme="dark"] .ace-pane .ace_variable     { color:#5dbcc4 !important; font-weight:600 !important; }
+    [data-theme="dark"] .ace-pane .ace_string       { color:#f59e0b !important; }
+    [data-theme="dark"] .ace-pane .ace_constant.ace_numeric  { color:#a78bfa !important; }
+    [data-theme="dark"] .ace-pane .ace_constant.ace_language { color:#60a5fa !important; }
+    [data-theme="dark"] .ace-pane .ace_paren, [data-theme="dark"] .ace-pane .ace_punctuation, [data-theme="dark"] .ace-pane .ace_keyword.ace_operator { color:#ada8a0 !important; }
+    /* Indent guides */
+    .ace-pane .ace_indent-guide { background:none !important; border-right:1px solid var(--color-border) !important; margin-right:-1px !important; visibility:hidden; }
+    [data-theme="dark"] .ace-pane .ace_indent-guide { border-right-color:rgba(255,255,255,.07) !important; }
+    /* Scrollbar */
+    .ace-pane .ace_scrollbar { transition:opacity .2s; background:transparent !important; }
+    .ace-pane .ace_scrollbar::-webkit-scrollbar { width:5px; height:5px; }
+    .ace-pane .ace_scrollbar::-webkit-scrollbar-track { background:transparent; }
+    .ace-pane .ace_scrollbar::-webkit-scrollbar-thumb { background:var(--color-divider); border-radius:9999px; }
+    .ace-pane .ace_scrollbar::-webkit-scrollbar-thumb:hover { background:var(--color-text-faint); }
+    /* Fold widgets / brackets */
+    .ace_fold-widget, .ace_bracket { display:none !important; }
+    /* Output only: hide cursor (panel is read-only) */
+    #out-je-wrap .ace_cursor { display:none !important; }
     /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width:800px) { .editors { grid-template-columns:1fr; } }
     @media (max-width:640px) {
@@ -457,12 +378,17 @@
     @media (prefers-reduced-motion:reduce) {
       *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
     }
-    /* JSONEditor hidden validation engine */
     #je-container { position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
-  </style>
+  
+  /* ── Input: textarea with synced line-number gutter ──────── */
+  .ta-wrap{position:absolute;inset:0;display:flex;overflow:hidden;font-family:var(--font-mono);font-size:.92rem;line-height:1.65;}
+  .ta-gutter{flex:none;min-width:2.8rem;padding:12px 8px 12px 6px;text-align:right;color:var(--color-text-faint);background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface));border-right:1px solid var(--color-border);overflow:hidden;user-select:none;white-space:pre;box-sizing:border-box;}
+  .ta-input{flex:1;border:none;outline:none;resize:none;padding:12px 14px;color:var(--color-text);background:transparent;caret-color:var(--color-primary);tab-size:2;-moz-tab-size:2;white-space:pre;overflow:auto;box-sizing:border-box;}
+  .ta-input::placeholder{color:var(--color-text-faint);}
+  .ta-input:focus{outline:none;}
+</style>
 </head>
 <body>
-<!-- ── Header ──────────────────────────────────────────────── -->
 <header class="topbar" role="banner">
   <div class="wrap topbar-inner">
     <a class="header-brand" href="./" aria-label="JSON Beautifier">
@@ -504,33 +430,30 @@
     </div>
   </div>
 </header>
-<!-- ── Main ────────────────────────────────────────────────── -->
 <main class="wrap" id="main-content">
   <section class="workspace" aria-label="JSON workspace">
     <div class="panel">
       <div class="panel-body">
         <div class="editors">
-          <!-- ── Input ─────────────────────────────────────── -->
+          <!-- ── Input — Ace editor (writable). No textarea, no line-number
+               <pre>. Ace virtualises large-file rendering natively.       -->
           <div class="ed-wrap">
             <div class="ed-topbar">
-              <label for="ed-input">Input</label>
+              <label>Input</label>
               <span class="ed-meta" id="meta-input">0 chars</span>
             </div>
-            <div class="ed-shell has-gutter" id="drop-zone">
-              <!-- Paste corner button -->
+            <div class="ed-shell" id="drop-zone">
               <button class="pane-btn" id="btn-paste-icon" title="Paste from clipboard" aria-label="Paste from clipboard">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
               </button>
-              <pre class="line-nums" id="ln-input" aria-hidden="true">1</pre>
-              <textarea id="ed-input" spellcheck="false" autocorrect="off" autocapitalize="off"
-                placeholder="Paste your JSON here…" aria-label="Input JSON"></textarea>
+              <div class="ta-wrap"><div class="ta-gutter" id="in-gutter" aria-hidden="true"></div><textarea id="json-input" class="ta-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Paste JSON here…" aria-label="Input JSON"></textarea></div>
             </div>
           </div>
           <!-- ── Output ────────────────────────────────────── -->
           <div class="ed-wrap">
             <div class="ed-topbar">
               <label>Output</label>
-              <div style="display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;height: 25px;">
+              <div style="display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;height:25px;">
                 <span class="ed-meta" id="meta-output">0 chars</span>
                 <div class="out-view-seg" role="group" aria-label="Output view mode">
                   <button type="button" class="vbtn" id="view-raw"  aria-pressed="true">Raw</button>
@@ -538,56 +461,44 @@
                 </div>
               </div>
             </div>
-            <!-- Shells wrapper — search bar floats inside, no layout impact -->
             <div class="out-shells">
-              <!-- Search overlay — open with Ctrl+F, absolute positioned over editor -->
               <div class="search-overlay" id="search-bar" hidden role="search" aria-label="Search output">
                 <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="search-input" class="search-input"
-                  placeholder="Find in output…" autocomplete="off" spellcheck="false" aria-label="Search query" />
-                <button type="button" class="search-toggle" id="search-regex"
-                  aria-pressed="false" title="Use regular expression (.*)">.*</button>
+                <input type="text" id="search-input" class="search-input" placeholder="Find in output…" autocomplete="off" spellcheck="false" aria-label="Search query" />
+                <button type="button" class="search-toggle" id="search-regex" aria-pressed="false" title="Use regular expression (.*)">.*</button>
                 <div class="search-sep" aria-hidden="true"></div>
                 <span class="search-count" id="search-count" aria-live="polite" aria-atomic="true"></span>
-                <button type="button" class="search-nav-btn" id="search-prev"
-                  title="Previous (Shift+Enter / Shift+F3)" aria-label="Previous match" disabled>
+                <button type="button" class="search-nav-btn" id="search-prev" title="Previous (Shift+Enter / Shift+F3)" aria-label="Previous match" disabled>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
                 </button>
-                <button type="button" class="search-nav-btn" id="search-next"
-                  title="Next (Enter / F3)" aria-label="Next match" disabled>
+                <button type="button" class="search-nav-btn" id="search-next" title="Next (Enter / F3)" aria-label="Next match" disabled>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="search-sep" aria-hidden="true"></div>
-                <button type="button" class="search-close-btn" id="search-close"
-                  title="Close (Escape)" aria-label="Close search">
+                <button type="button" class="search-close-btn" id="search-close" title="Close (Escape)" aria-label="Close search">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
               </div>
-              <!-- Raw output — JSONEditor Ace editor fills this shell -->
               <div class="ed-shell" id="out-ed-shell">
-                <!-- Copy corner button -->
                 <button class="pane-btn" id="btn-copy-icon" title="Copy to clipboard" aria-label="Copy to clipboard">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 </button>
-                <!-- JSONEditor (Ace) injected here -->
-                <div id="out-je-wrap" aria-label="Formatted JSON output"></div>
+                <div id="out-je-wrap" class="ace-pane" aria-label="Formatted JSON output"></div>
               </div>
-              <!-- Tree view -->
               <div class="tree-shell" id="tree-shell" hidden>
                 <div class="tree-view" id="tree-view" aria-label="JSON tree view" role="tree"></div>
               </div>
-            </div><!-- /out-shells -->
+            </div>
           </div>
-        </div><!-- /editors -->
-        <!-- Status message row -->
+        </div>
         <div class="msg-row">
           <span class="w-spinner" id="w-spinner" aria-label="Processing"></span>
           <div class="msg-box" id="msg-box" data-state="idle" role="status" aria-live="polite">
             <strong>Ready</strong>
-            <p>Paste your raw JSON, upload a file, or load the sample.</p>
+            <p>Paste your JSON here, upload a file, or load the sample.</p>
           </div>
         </div>
-      </div><!-- /panel-body -->
+      </div>
       <div class="statusbar">
         <div class="chip-row" aria-live="polite">
           <span class="chip">Lines: <strong id="lines-text">0</strong></span>
@@ -615,16 +526,13 @@
     </div>
   </section>
 </main>
-<!-- Hidden JSONEditor validation engine -->
 <div id="je-container" aria-hidden="true"></div>
-<!--
-  JSONEditor JS — loaded synchronously so it's available when our
-  main script block executes immediately below.
--->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.4/jsoneditor.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   1. WEB WORKER  (Function.toString() blob — zero escaping issues)
+   1. WEB WORKER — only used for files > SYNC_THRESHOLD chars.
+      For typical API responses the synchronous path is used,
+      eliminating the postMessage / structured-clone overhead.
    ═══════════════════════════════════════════════════════════════ */
 function _workerFn() {
   'use strict';
@@ -632,707 +540,700 @@ function _workerFn() {
   function fmtError(msg, raw) {
     try {
       const ff = msg.match(/line (\d+) column (\d+)/i);
-      if (ff) return 'Line ' + ff[1] + ', Column ' + ff[2] + ' — ' + msg.replace(/ of the JSON data.*/i,'').trim();
-      const cr = msg.match(/at position (\d+)/i) || msg.match(/position (\d+)/i);
+      if (ff) return 'Line '+ff[1]+', Column '+ff[2]+' — '+msg.replace(/ of the JSON data.*/i,'').trim();
+      const cr = msg.match(/at position (\d+)/i)||msg.match(/position (\d+)/i);
       if (cr && raw) {
-        const pos = +cr[1], before = raw.slice(0, pos);
-        const line = (before.match(/\n/g)||[]).length + 1;
-        const col  = pos - before.lastIndexOf('\n');
-        return 'Line ' + line + ', Column ' + col + ' — ' + msg;
+        const pos=+cr[1], before=raw.slice(0,pos);
+        const line=(before.match(/\n/g)||[]).length+1;
+        const col=pos-before.lastIndexOf('\n');
+        return 'Line '+line+', Column '+col+' — '+msg;
       }
-    } catch (_) {}
+    } catch(_){}
     return msg;
   }
-  self.onmessage = function(ev) {
-    const { id, op, raw, indent } = ev.data;
-    try {
-      if (!raw || !raw.trim()) throw new Error('Input is empty, please paste some JSON first.');
-      const parsed    = JSON.parse(raw);
-      const formatted = op === 'minify' ? JSON.stringify(parsed) : JSON.stringify(parsed, null, indent);
-      self.postMessage({
-        id, ok: true, op, formatted,
-        bytes: enc.encode(formatted).length,
-        lines: formatted ? formatted.split('\n').length : 0
-      });
-    } catch (e) {
-      self.postMessage({ id, ok: false, op, message: fmtError(e.message || 'Unknown error', raw) });
+  self.onmessage=function(ev){
+    const{id,op,raw,indent}=ev.data;
+    try{
+      if(!raw||!raw.trim()) throw new Error('Input is empty, please paste some JSON first.');
+      const parsed=JSON.parse(raw);
+      const formatted=op==='minify'?JSON.stringify(parsed):JSON.stringify(parsed,null,indent);
+      self.postMessage({id,ok:true,op,formatted,bytes:enc.encode(formatted).length,lines:formatted?formatted.split('\n').length:0});
+    }catch(e){
+      self.postMessage({id,ok:false,op,message:fmtError(e.message||'Unknown error',raw)});
     }
   };
 }
-/* Revoke the object URL immediately — Worker already holds the reference internally */
-const _workerBlob = URL.createObjectURL(
-  new Blob(['(' + _workerFn.toString() + ')();'], { type:'application/javascript' })
-);
-const _w = new Worker(_workerBlob);
+const _workerBlob=URL.createObjectURL(new Blob(['('+_workerFn.toString()+')();'],{type:'application/javascript'}));
+const _w=new Worker(_workerBlob);
 URL.revokeObjectURL(_workerBlob);
 /* ═══════════════════════════════════════════════════════════════
    2. THEME TOGGLE
    ═══════════════════════════════════════════════════════════════ */
-(() => {
-  const html = document.documentElement;
-  const btn  = document.getElementById('theme-btn');
-  const icons = {
-    sun:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`,
-    moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+(()=>{
+  const html=document.documentElement;
+  const btn=document.getElementById('theme-btn');
+  const icons={
+    sun:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`,
+    moon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
   };
-  let mode = html.getAttribute('data-theme') || 'light';
-  const apply = () => {
-    html.setAttribute('data-theme', mode);
-    btn.innerHTML = mode === 'dark' ? icons.sun : icons.moon;
-    btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    btn.title = mode === 'dark' ? 'Light mode' : 'Dark mode';
+  let mode=html.getAttribute('data-theme')||'light';
+  const apply=()=>{
+    html.setAttribute('data-theme',mode);
+    btn.innerHTML=mode==='dark'?icons.sun:icons.moon;
+    btn.setAttribute('aria-label',mode==='dark'?'Switch to light mode':'Switch to dark mode');
+    btn.title=mode==='dark'?'Light mode':'Dark mode';
   };
-  btn.addEventListener('click', () => {
-    mode = mode === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem('json-theme', mode); } catch (_) {}
+  btn.addEventListener('click',()=>{
+    mode=mode==='dark'?'light':'dark';
+    try{localStorage.setItem('json-theme',mode);}catch(_){}
     apply();
-    /* Force Ace to repaint so CSS variable changes take effect */
-    if (window._aceOut) setTimeout(() => window._aceOut.renderer.updateFull(true), 0);
+    /* Repaint both Ace instances so CSS-variable token colours refresh */
+    if(window._aceOut) setTimeout(()=>window._aceOut.renderer.updateFull(true),0);
   });
   apply();
 })();
 /* ═══════════════════════════════════════════════════════════════
    3. MAIN EDITOR LOGIC
    ═══════════════════════════════════════════════════════════════ */
-(() => {
+(()=>{
   /* ── DOM refs ─────────────────────────────────────────────── */
-  const elIn          = document.getElementById('ed-input');
-  const lnIn          = document.getElementById('ln-input');
-  const metaIn        = document.getElementById('meta-input');
-  const metaOut       = document.getElementById('meta-output');
-  const msgBox        = document.getElementById('msg-box');
-  const spinner       = document.getElementById('w-spinner');
-  const linesEl       = document.getElementById('lines-text');
-  const bytesEl       = document.getElementById('bytes-text');
-  const fileIn        = document.getElementById('file-in');
-  const dropZone      = document.getElementById('drop-zone');
-  const btnUpload     = document.getElementById('btn-upload');
-  const indentSelect  = document.getElementById('indent-select');
-  const treeViewEl    = document.getElementById('tree-view');
-  const treeShell     = document.getElementById('tree-shell');
-  const outEdShell    = document.getElementById('out-ed-shell');
-  const viewRawBtn    = document.getElementById('view-raw');
-  const viewTreeBtn   = document.getElementById('view-tree');
-  /* Search */
-  const searchBar     = document.getElementById('search-bar');
-  const searchInput   = document.getElementById('search-input');
-  const searchRegexBtn= document.getElementById('search-regex');
-  const searchCount   = document.getElementById('search-count');
-  const searchPrev    = document.getElementById('search-prev');
-  const searchNext    = document.getElementById('search-next');
-  const searchClose   = document.getElementById('search-close');
+  const metaIn        =document.getElementById('meta-input');
+  const metaOut       =document.getElementById('meta-output');
+  const msgBox        =document.getElementById('msg-box');
+  const spinner       =document.getElementById('w-spinner');
+  const linesEl       =document.getElementById('lines-text');
+  const bytesEl       =document.getElementById('bytes-text');
+  const fileIn        =document.getElementById('file-in');
+  const dropZone      =document.getElementById('drop-zone');
+  const btnUpload     =document.getElementById('btn-upload');
+  const indentSelect  =document.getElementById('indent-select');
+  const treeViewEl    =document.getElementById('tree-view');
+  const treeShell     =document.getElementById('tree-shell');
+  const outEdShell    =document.getElementById('out-ed-shell');
+  const viewRawBtn    =document.getElementById('view-raw');
+  const viewTreeBtn   =document.getElementById('view-tree');
+  const searchBar     =document.getElementById('search-bar');
+  const searchInput   =document.getElementById('search-input');
+  const searchRegexBtn=document.getElementById('search-regex');
+  const searchCount   =document.getElementById('search-count');
+  const searchPrev    =document.getElementById('search-prev');
+  const searchNext    =document.getElementById('search-next');
+  const searchClose   =document.getElementById('search-close');
   /* ── State ──────────────────────────────────────────────────── */
-  let indent        = 2;
-  let outputMode    = 'raw';
-  let debTimer      = null;
-  let _pendingId    = 0;
-  let _lastFormatted= '';
-  let _lastParsed   = null; /* parsed object — cached to avoid re-parsing on tree render */
-  let _treeContent  = '';   /* content the tree was last rendered for */
-  let _nodeIdCtr    = 0;
-  const _toggleMap  = new Map();
-  const _lnCache    = new WeakMap();
-  const _enc        = new TextEncoder();
-  /* Search state */
-  let _searchOpen   = false;
-  let _useRegex     = false;
-  let _aceTotal     = 0;
-  let _aceCurrent   = 0;
-  /* Tree search */
-  let _treeMatches  = [];
-  let _treeCurrent  = -1;
-  /* ── JSONEditor setup ────────────────────────────────────────── */
-  let _je     = null; /* hidden validation engine */
-  let _aceOut = null; /* Ace editor (output) */
-  if (typeof JSONEditor !== 'undefined') {
-    /* Hidden text-mode engine for jsonlint error extraction */
-    try { _je = new JSONEditor(document.getElementById('je-container'), { mode:'text' }); } catch (_) {}
-    /* Code-mode (Ace) for the output panel */
-    try {
-      const jeOut = new JSONEditor(document.getElementById('out-je-wrap'), {
-        mode:          'code',
-        mainMenuBar:   false,
-        statusBar:     false,
-        navigationBar: false,
-        onError:       () => {}
+  let indent        =2;
+  let outputMode    ='raw';
+  let debTimer      =null;
+  let _pendingId    =0;
+  let _lastFormatted='';
+  let _lastParsed   =null;
+  let _treeContent  ='';
+  let _nodeIdCtr    =0;
+  let _resetting    =false;  /* guards makeItReady / setValue loop */
+  const _toggleMap  =new Map();
+  const _enc        =new TextEncoder();
+  let _searchOpen   =false;
+  let _useRegex     =false;
+  let _aceTotal     =0;
+  let _aceCurrent   =0;
+  let _treeMatches  =[];
+  let _treeCurrent  =-1;
+  /* ── Sync threshold: below this we skip the Worker entirely.
+     JSON.parse + JSON.stringify is instant for < ~100 KB files,
+     eliminating the postMessage / structured-clone round-trip
+     for the vast majority of real-world use cases.             */
+  const SYNC_THRESHOLD=100_000;
+  /* ── JSONEditor / Ace setup ──────────────────────────────────── */
+  let _je    =null;
+  let _taIn=null,_taGutter=null;
+  const _updateGutter=()=>{
+    if(!_taIn||!_taGutter) return;
+    const n=_taIn.value.split('\n').length;
+    if(_taGutter._n===n){_taGutter.scrollTop=_taIn.scrollTop;return;}
+    _taGutter._n=n;
+    let s='';for(let i=1;i<=n;i++) s+=i+'\n';
+    _taGutter.textContent=s;
+    _taGutter.scrollTop=_taIn.scrollTop;
+  };
+  let _aceOut=null;
+  if(typeof JSONEditor!=='undefined'){
+    /* Hidden text-mode validation engine (jsonlint-style errors) */
+    try{_je=new JSONEditor(document.getElementById('je-container'),{mode:'text'});}catch(_){}
+    /* Input — textarea with line-number gutter (replaces Ace on input side) */
+    _taIn=document.getElementById('json-input');
+    _taGutter=document.getElementById('in-gutter');
+    _taIn.addEventListener('input',()=>{
+      if(_resetting) return;
+      const val=_taIn.value;
+      metaIn.textContent=val.length+' chars';
+      _updateGutter();
+      if(!val.trim()){clearTimeout(debTimer);makeItReady();}
+      else debouncedBeautify();
+    });
+    _taIn.addEventListener('scroll',()=>_updateGutter());
+    _taIn.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){e.preventDefault();const s=_taIn.selectionStart,en=_taIn.selectionEnd;_taIn.value=_taIn.value.slice(0,s)+'  '+_taIn.value.slice(en);_taIn.selectionStart=_taIn.selectionEnd=s+2;return;}
+      const mod=e.ctrlKey||e.metaKey;if(!mod) return;
+      if(e.key==='Enter')                  {e.preventDefault();beautify();}
+      else if(e.key==='m'||e.key==='M')    {e.preventDefault();minify();}
+      else if(e.key==='f'||e.key==='F')    {e.preventDefault();openSearch();}
+      else if(e.shiftKey&&e.key==='C')     {e.preventDefault();copyOut();}
+      else if(e.shiftKey&&e.key==='X')     {e.preventDefault();makeItReady();}
+    });
+    _updateGutter();
+    /* Output editor — read-only Ace ─────────────────────────── */
+    try{
+      const jeOut=new JSONEditor(document.getElementById('out-je-wrap'),{
+        mode:'code',mainMenuBar:false,statusBar:false,navigationBar:false,onError:()=>{}
       });
-      _aceOut = jeOut.aceEditor;
-      if (_aceOut) {
-        window._aceOut = _aceOut;          /* expose for theme toggle */
+      _aceOut=jeOut.aceEditor;
+      if(_aceOut){
+        window._aceOut=_aceOut;
         _aceOut.setReadOnly(true);
         _aceOut.setShowPrintMargin(false);
-        _aceOut.renderer.setScrollMargin(12, 12, 0, 0);
-        _aceOut.$blockScrolling = Infinity;
-        /* Disable Ace's built-in find/replace dialog — we use our own search bar */
-        _aceOut.commands.removeCommand('find');
-        _aceOut.commands.removeCommand('findnext');
-        _aceOut.commands.removeCommand('findprevious');
-        _aceOut.commands.removeCommand('replace');
-        _aceOut.commands.removeCommand('replaceall');
-        /* Placeholder appearance */
+        _aceOut.renderer.setScrollMargin(12,12,0,0);
+        _aceOut.$blockScrolling=Infinity;
+        ['find','findnext','findprevious','replace','replaceall'].forEach(c=>_aceOut.commands.removeCommand(c));
         _aceOut.setValue('', -1);
-        /* Update meta whenever Ace content changes (rare outside our control) */
-        _aceOut.on('change', () => {
-          if (_aceOut) metaOut.textContent = (_lastFormatted.length || 0) + ' chars';
+        _aceOut.on('change',()=>{
+          if(_aceOut) metaOut.textContent=(_lastFormatted.length||0)+' chars';
         });
       }
-    } catch (e) { console.warn('JSONEditor code mode init failed:', e); }
+    }catch(e){console.warn('Output JSONEditor init failed:',e);}
   }
+  /* ── Inline error formatter (mirrors the Worker's fmtError) ── */
+  const _fmtError=(msg,raw)=>{
+    try{
+      const ff=msg.match(/line (\d+) column (\d+)/i);
+      if(ff) return 'Line '+ff[1]+', Column '+ff[2]+' — '+msg.replace(/ of the JSON data.*/i,'').trim();
+      const cr=msg.match(/at position (\d+)/i)||msg.match(/position (\d+)/i);
+      if(cr&&raw){
+        const pos=+cr[1],before=raw.slice(0,pos);
+        const line=(before.match(/\n/g)||[]).length+1;
+        const col=pos-before.lastIndexOf('\n');
+        return 'Line '+line+', Column '+col+' — '+msg;
+      }
+    }catch(_){}
+    return msg;
+  };
   /* ── Sample ──────────────────────────────────────────────────── */
-  const sample = {
-    app:'JSON Beautifier', version:'2.0.0',
+  const sample={
+    app:'JSON Beautifier',version:'2.0.0',
     features:['beautify','minify','validate','copy','download','dark-mode','search','worker','ace-editor'],
-    hosting:{ platform:'GitHub', static:true },
-    keyboard:{ beautify:'Ctrl+Enter', minify:'Ctrl+M', find:'Ctrl+F', clear:'Ctrl+Shift+X' }
+    hosting:{platform:'GitHub',static:true},
+    keyboard:{beautify:'Ctrl+Enter',minify:'Ctrl+M',find:'Ctrl+F',clear:'Ctrl+Shift+X'}
   };
   /* ── Helpers ─────────────────────────────────────────────────── */
-  const getBytes = t => t ? _enc.encode(t).length : 0;
-  const getLines = t => t ? t.split('\n').length : 0;
-  const updateLineNumbers = (textarea, target) => {
-    const n = Math.max(1, textarea.value.split('\n').length);
-    if (_lnCache.get(target) === n) return;
-    _lnCache.set(target, n);
-    const arr = []; for (let i = 1; i <= n; i++) arr.push(i);
-    target.textContent = arr.join('\n');
-    /* Expand gutter width when digit-count grows (e.g. past 999, 9999 lines) */
-    const digits = String(n).length;
-    const remW   = (Math.max(2, digits) * 0.7 + 0.8).toFixed(2);
-    dropZone.style.setProperty('--gutter-w', remW + 'rem');
+  const setMsg=(title,body,state='idle')=>{
+    msgBox.dataset.state=state;
+    msgBox.innerHTML='';
+    const s=document.createElement('strong'),p=document.createElement('p');
+    s.textContent=title; p.textContent=body;
+    msgBox.append(s,p);
   };
-  const setMsg = (title, body, state = 'idle') => {
-    msgBox.dataset.state = state;
-    msgBox.innerHTML = '';
-    const s = document.createElement('strong'), p = document.createElement('p');
-    s.textContent = title; p.textContent = body;
-    msgBox.append(s, p);
+  const getRaw=()=>(_taIn?_taIn.value:'');
+  /* Set input Ace value. Pass suppressChange=true to prevent the
+     'change' event from triggering debouncedBeautify/makeItReady. */
+  const setInputValue=(text,suppressChange)=>{
+    if(!_taIn) return;
+    if(suppressChange) _resetting=true;
+    _taIn.value=text;
+    _updateGutter();
+    if(suppressChange) _resetting=false;
   };
   /* ── setOutput ───────────────────────────────────────────────── */
-  const setOutput = (formatted) => {
-    _lastFormatted = formatted;
-    try { _lastParsed = JSON.parse(formatted); } catch { _lastParsed = null; }
-    _treeContent   = '';   /* invalidate tree cache */
-    if (_aceOut) {
+  const setOutput=(formatted)=>{
+    _lastFormatted=formatted;
+    try{_lastParsed=JSON.parse(formatted);}catch{_lastParsed=null;}
+    _treeContent='';
+    if(_aceOut){
       _aceOut.setReadOnly(false);
-      _aceOut.setValue(formatted, -1);
+      _aceOut.setValue(formatted,-1);
       _aceOut.setReadOnly(true);
       _aceOut.clearSelection();
-      /* Re-apply search highlight if search bar is open */
-      if (_searchOpen && searchInput.value) runSearchAce(false);
+      if(_searchOpen&&searchInput.value) runSearchAce(false);
     }
-    metaOut.textContent = formatted.length + ' chars';
-    /* If tree view is active, re-render */
-    if (outputMode === 'tree') _renderTree();
+    metaOut.textContent=formatted.length+' chars';
+    if(outputMode==='tree') _renderTree();
   };
-  /* ── Worker handler ─────────────────────────────────────────── */
-  _w.onmessage = ev => {
-    const { id, ok, op, formatted, bytes, lines, message } = ev.data;
-    if (id !== _pendingId) return;
+  /* ── handleError ─────────────────────────────────────────────── */
+  const handleError=(msg,raw)=>{
+    let richMsg=_fmtError(msg,raw);
+    if(_je){
+      try{_je.setText(raw);_je.get();}
+      catch(jeErr){if(jeErr.message&&jeErr.message.length>richMsg.length) richMsg=jeErr.message;}
+    }
+    if(_aceOut){_aceOut.setReadOnly(false);_aceOut.setValue('',-1);_aceOut.setReadOnly(true);}
+    _lastFormatted='';_lastParsed=null;_treeContent='';
+    metaOut.textContent='0 chars';
+    linesEl.textContent='0';bytesEl.textContent='0';
+    setMsg('Error',richMsg,'err');
+  };
+  /* ── Worker handler (large files only) ─────────────────────── */
+  _w.onmessage=ev=>{
+    const{id,ok,op,formatted,bytes,lines,message}=ev.data;
+    if(id!==_pendingId) return;
     spinner.classList.remove('active');
-    if (ok) {
+    if(ok){
       setOutput(formatted);
-      linesEl.textContent = String(lines);
-      bytesEl.textContent = String(bytes);
+      linesEl.textContent=String(lines);
+      bytesEl.textContent=String(bytes);
       setMsg(
-        op === 'beautify' ? 'Beautified' : 'Minified',
-        op === 'beautify'
-          ? 'JSON formatted with ' + (typeof indent === 'number' ? indent + ' spaces' : 'tabs') + ' of indentation.'
-          : 'All unnecessary whitespace removed.',
+        op==='beautify'?'Beautified':'Minified',
+        op==='beautify'
+          ?'JSON formatted with '+(typeof indent==='number'?indent+' spaces':'tabs')+' of indentation.'
+          :'All unnecessary whitespace removed.',
         'ok'
       );
-    } else {
-      /* Try jsonlint for a better error message */
-      let msg = message;
-      if (_je) {
-        try { _je.setText(elIn.value); _je.get(); }
-        catch (jeErr) { if (jeErr.message && jeErr.message.length > msg.length) msg = jeErr.message; }
-      }
-      if (_aceOut) { _aceOut.setReadOnly(false); _aceOut.setValue('', -1); _aceOut.setReadOnly(true); }
-      _lastFormatted = ''; _lastParsed = null; _treeContent = '';
-      metaOut.textContent = '0 chars';
-      linesEl.textContent = '0'; bytesEl.textContent = '0';
-      setMsg('Error', msg, 'err');
+    }else{
+      handleError(message,getRaw());
     }
   };
-  _w.onerror = e => {
+  _w.onerror=e=>{
     spinner.classList.remove('active');
-    setMsg('Worker error', e.message || 'Background processing failed.', 'err');
+    setMsg('Worker error',e.message||'Background processing failed.','err');
   };
-  const dispatch = op => {
-    if (!elIn.value.trim()) { setMsg('Empty', 'Paste JSON first.', 'err'); return; }
+  /* ── dispatch ────────────────────────────────────────────────
+     FAST PATH  (< SYNC_THRESHOLD chars): JSON.parse + stringify
+     runs synchronously on the main thread — zero copy overhead,
+     zero event-loop latency. Output appears in the same frame.
+
+     WORKER PATH (>= SYNC_THRESHOLD): offloads to the Worker so
+     multi-MB files never block the UI thread.
+  ──────────────────────────────────────────────────────────── */
+  const dispatch=op=>{
+    const raw=getRaw();
+    if(!raw.trim()){setMsg('Empty','Paste JSON first.','err');return;}
+    if(raw.length<SYNC_THRESHOLD){
+      /* Synchronous fast path */
+      try{
+        const parsed=JSON.parse(raw);
+        const formatted=op==='minify'?JSON.stringify(parsed):JSON.stringify(parsed,null,indent);
+        setOutput(formatted);
+        linesEl.textContent=String(formatted?formatted.split('\n').length:0);
+        bytesEl.textContent=String(_enc.encode(formatted).length);
+        setMsg(
+          op==='beautify'?'Beautified':'Minified',
+          op==='beautify'
+            ?'JSON formatted with '+(typeof indent==='number'?indent+' spaces':'tabs')+' of indentation.'
+            :'All unnecessary whitespace removed.',
+          'ok'
+        );
+      }catch(e){
+        handleError(e.message||'Unknown error',raw);
+      }
+      return;
+    }
+    /* Worker path for large files */
     spinner.classList.add('active');
-    _w.postMessage({ id: ++_pendingId, op, raw: elIn.value, indent });
+    _w.postMessage({id:++_pendingId,op,raw,indent});
   };
-  const beautify = () => dispatch('beautify');
-  const minify   = () => dispatch('minify');
-  const makeItReady = () => {
+  const beautify=()=>dispatch('beautify');
+  const minify  =()=>dispatch('minify');
+  /* ── makeItReady ─────────────────────────────────────────────── */
+  const makeItReady=()=>{
     clearTimeout(debTimer); _pendingId++;
     spinner.classList.remove('active');
-    elIn.value = ''; _lastFormatted = ''; _lastParsed = null; _treeContent = '';
-    if (_aceOut) { _aceOut.setReadOnly(false); _aceOut.setValue('', -1); _aceOut.setReadOnly(true); }
-    /* Clear tree DOM and reset node registry */
-    treeViewEl.innerHTML = ''; _toggleMap.clear(); _nodeIdCtr = 0;
-    updateLineNumbers(elIn, lnIn); metaIn.textContent = '0 chars';
-    metaOut.textContent = '0 chars'; linesEl.textContent = '0'; bytesEl.textContent = '0';
+    setInputValue('',true); /* suppressChange prevents re-entry */
+    _lastFormatted='';_lastParsed=null;_treeContent='';
+    if(_aceOut){_aceOut.setReadOnly(false);_aceOut.setValue('',-1);_aceOut.setReadOnly(true);}
+    treeViewEl.innerHTML='';_toggleMap.clear();_nodeIdCtr=0;
+    metaIn.textContent='0 chars';metaOut.textContent='0 chars';
+    linesEl.textContent='0';bytesEl.textContent='0';
     closeSearch();
-    setMsg('Ready', 'Paste your raw JSON, upload a file, or load the sample.');
+    setMsg('Ready','Paste your JSON here, upload a file, or load the sample.');
   };
   /* ── Clipboard ────────────────────────────────────────────────── */
-  const legacyCopy = text => {
-    const t = Object.assign(document.createElement('textarea'), { value:text, readOnly:true });
-    Object.assign(t.style, { position:'fixed', top:'-9999px', opacity:'0' });
-    document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
+  const legacyCopy=text=>{
+    const t=Object.assign(document.createElement('textarea'),{value:text,readOnly:true});
+    Object.assign(t.style,{position:'fixed',top:'-9999px',opacity:'0'});
+    document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
   };
-  const copyOut = async () => {
-    if (!_lastFormatted) { setMsg('Nothing to copy', 'Generate output first.', 'err'); return; }
-    try {
-      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(_lastFormatted);
+  const copyOut=async()=>{
+    if(!_lastFormatted){setMsg('Nothing to copy','Generate output first.','err');return;}
+    try{
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(_lastFormatted);
       else legacyCopy(_lastFormatted);
-      setMsg('Copied', 'Output JSON copied to clipboard.', 'ok');
-    } catch (e) { setMsg('Copy failed', e.message || 'Clipboard access denied.', 'err'); }
+      setMsg('Copied','Output JSON copied to clipboard.','ok');
+    }catch(e){setMsg('Copy failed',e.message||'Clipboard access denied.','err');}
   };
-  const pasteIn = async () => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        const text = await navigator.clipboard.readText();
-        if (!text) return;
-        elIn.value = text; refreshMeta(); beautify();
+  const pasteIn=async()=>{
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        const text=await navigator.clipboard.readText();
+        if(!text) return;
+        setInputValue(text,true);
+        metaIn.textContent=text.length+' chars';
+        beautify();
       }
-    } catch (e) { setMsg('Paste failed', e.message || 'Clipboard access denied.', 'err'); }
+    }catch(e){setMsg('Paste failed',e.message||'Clipboard access denied.','err');}
   };
   /* ── Download ─────────────────────────────────────────────────── */
-  const download = () => {
-    if (!_lastFormatted) { setMsg('Nothing to download', 'Generate output first.', 'err'); return; }
-    const url = URL.createObjectURL(new Blob([_lastFormatted], { type:'application/json' }));
-    const a   = Object.assign(document.createElement('a'), { href:url, download:'formatted.json' });
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-    setMsg('Download started', 'Your formatted JSON file is being saved.', 'ok');
+  const download=()=>{
+    if(!_lastFormatted){setMsg('Nothing to download','Generate output first.','err');return;}
+    const url=URL.createObjectURL(new Blob([_lastFormatted],{type:'application/json'}));
+    const a=Object.assign(document.createElement('a'),{href:url,download:'formatted.json'});
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    setMsg('Download started','Your formatted JSON file is being saved.','ok');
   };
-  /* ── File loading (auto-beautifies on upload) ─────────────────── */
-  const loadFile = async file => {
-    if (!file) return;
-    try {
-      const text = await file.text();
-      elIn.value = text;
-      refreshMeta();
-      /* Auto-beautify immediately on upload */
+  /* ── File loading ─────────────────────────────────────────────── */
+  const loadFile=async file=>{
+    if(!file) return;
+    try{
+      const text=await file.text();
+      setInputValue(text,true);
+      metaIn.textContent=text.length+' chars';
       beautify();
-      setMsg('File loaded', file.name + ' — formatting…', 'ok');
-    } catch (e) { setMsg('Upload failed', e.message || 'Unable to read this file.', 'err'); }
+      setMsg('File loaded',file.name+' — formatting…','ok');
+    }catch(e){setMsg('Upload failed',e.message||'Unable to read this file.','err');}
   };
-  const refreshMeta = () => {
-    metaIn.textContent = elIn.value.length + ' chars';
-    updateLineNumbers(elIn, lnIn);
+  /* ── Debounced auto-beautify ──────────────────────────────── */
+  const debouncedBeautify=()=>{
+    clearTimeout(debTimer);
+    debTimer=setTimeout(()=>{if(getRaw().trim()) beautify();},300);
   };
   /* ═══════════════════════════════════════════════════════════
-     TREE BUILDER  — all nodes start collapsed, children
-     rendered lazily on first expand (no pagination).
-     Click a node to expand/collapse it individually.
-     Search auto-expands only matched nodes one at a time.
+     TREE BUILDER — GPU-composited, rAF-deferred, ~4 el/node, contain:layout
+     ═══════════════════════════════════════════════════════════
+     Fix 1: scaleY transition (compositor thread, zero layout cost)
+     Fix 2: renderChildren deferred behind requestAnimationFrame
+     Fix 3: insertAdjacentHTML reduces per-node DOM from ~9 → ~4 elements
+     Fix 4: contain:layout style on .tn (CSS, see stylesheet above)
   ═══════════════════════════════════════════════════════════ */
-  const _typeOf = v => v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v;
-  const _span   = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; return s; };
-  const _punct  = ch => _span('json-punct', ch);
-  const _caret  = () => {
-    const svg  = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    svg.setAttribute('viewBox','0 0 8 8'); path.setAttribute('d','M2 1.5 L6 4 L2 6.5 Z');
-    svg.appendChild(path); return svg;
-  };
-  /**
-   * _buildNode builds a tree node for `value`.
-   * All complex nodes (object/array) start collapsed.
-   * Children are NOT rendered until the node is first expanded.
-   */
-  const _buildNode = (value, key, isLast) => {
-    const type      = _typeOf(value);
-    const isComplex = type === 'object' || type === 'array';
-    const node = document.createElement('div'); node.className = 'tn';
-    const row  = document.createElement('div'); row.className = isComplex ? 'tn-row clickable is-closed' : 'tn-row';
-    const tri = document.createElement('span'); tri.className = 'tn-toggle';
-    if (isComplex) tri.appendChild(_caret());
-    row.appendChild(tri);
-    if (key !== null) {
-      const ks = document.createElement('span');
-      if (typeof key === 'number') { ks.className='json-index'; ks.textContent='['+key+']'; }
-      else                         { ks.className='json-key';   ks.textContent='"'+key+'"'; }
-      row.appendChild(ks); row.appendChild(_punct(': '));
-    }
-    if (!isComplex) {
-      const vs = document.createElement('span');
-      vs.className = type==='string'?'json-str':type==='number'?'json-num':type==='boolean'?'json-bool':'json-null';
-      vs.textContent = type==='string' ? JSON.stringify(value) : type==='null' ? 'null' : String(value);
-      row.appendChild(vs);
-      if (!isLast) row.appendChild(_punct(','));
-      node.appendChild(row); return node;
-    }
-    const isArr   = type === 'array';
-    const entries = isArr ? value : Object.keys(value);
-    const count   = entries.length;
-    row.appendChild(_punct(isArr ? '[' : '{'));
-    const summary = document.createElement('span'); summary.className = 'tn-summary';
-    summary.textContent = count === 0 ? ' '+(isArr?']':'}')
-      : isArr ? ' … ('+count+' items) ]' : ' … ('+count+' keys) }';
-    row.appendChild(summary);
-    node.appendChild(row);
-    if (count === 0) {
-      row.appendChild(_punct(isArr?']':'}')); if (!isLast) row.appendChild(_punct(','));
+  const _CARET_HTML='<svg viewBox="0 0 8 8"><path d="M2 1.5 L6 4 L2 6.5 Z"/></svg>';
+  const _esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const _typeOf=v=>v===null?'null':Array.isArray(v)?'array':typeof v;
+
+  const _buildNode=(value,key,isLast)=>{
+    const type     =_typeOf(value);
+    const isComplex=type==='object'||type==='array';
+    const node=document.createElement('div');node.className='tn';
+    const comma=isLast?'':'<span class="json-punct">,</span>';
+    const keyHtml=key===null?''
+      :(typeof key==='number'
+        ?`<span class="json-index">[${key}]</span><span class="json-punct">: </span>`
+        :`<span class="json-key">"${_esc(key)}"</span><span class="json-punct">: </span>`);
+
+    /* ── Leaf node: div.tn > div.tn-row  (~2 real elements) ── */
+    if(!isComplex){
+      const cls=type==='string'?'json-str':type==='number'?'json-num':type==='boolean'?'json-bool':'json-null';
+      const raw=type==='string'?_esc(JSON.stringify(value)):type==='null'?'null':_esc(String(value));
+      node.insertAdjacentHTML('beforeend',
+        `<div class="tn-row"><span class="tn-toggle"></span>${keyHtml}<span class="${cls}">${raw}</span>${comma}</div>`);
       return node;
     }
-    const wrap  = document.createElement('div'); wrap.className = 'tn-children';
-    const inner = document.createElement('div'); inner.className = 'tn-inner';
-    const body  = document.createElement('div'); body.className  = 'tn-body';
-    /* ── Lazy rendering ──────────────────────────────────────────
-       Children are NOT rendered until the node is first expanded.
-       On first expand, ALL children are rendered at once (no paging).
-    ──────────────────────────────────────────────────────────── */
-    let rendered  = false;
-    let collapsed = true;  /* always start collapsed */
-    /* Render all children at once — called once on first expand */
-    const renderChildren = () => {
-      if (rendered) return;
-      rendered = true;
-      const frag = document.createDocumentFragment();
-      for (let idx = 0; idx < count; idx++) {
-        const item = entries[idx];
-        const ck   = isArr ? idx  : item;
-        const cv   = isArr ? item : value[item];
-        frag.appendChild(_buildNode(cv, ck, idx === count - 1));
+
+    /* ── Complex node (object/array) ── */
+    const isArr  =type==='array';
+    const entries=isArr?value:Object.keys(value);
+    const count  =entries.length;
+    const open   =isArr?'[':'{';
+    const close  =isArr?']':'}';
+    const nodeId =_nodeIdCtr++;
+
+    if(count===0){
+      node.insertAdjacentHTML('beforeend',
+        `<div class="tn-row" data-tn-id="${nodeId}"><span class="tn-toggle"></span>${keyHtml}<span class="json-punct">${open}${close}</span>${comma}</div>`);
+      return node;
+    }
+
+    const summaryTxt=isArr?`[${count} item${count!==1?'s':''}]`:`{${count} key${count!==1?'s':''}}`;
+
+    node.insertAdjacentHTML('beforeend',
+      `<div class="tn-row clickable is-closed" data-tn-id="${nodeId}">` +
+        `<span class="tn-toggle">${_CARET_HTML}</span>` +
+        `${keyHtml}` +
+        `<span class="json-punct">${open}</span>` +
+        `<span class="tn-summary"> ${summaryTxt}</span>` +
+      `</div>` +
+      `<div class="tn-children collapsed">` +
+        `<div class="tn-inner">` +
+          `<div class="tn-body"></div>` +
+          `<div class="tn-row"><span class="tn-toggle"></span><span class="json-punct">${close}</span>${comma}</div>` +
+        `</div>` +
+      `</div>`
+    );
+
+    const row =node.firstElementChild;              /* div.tn-row */
+    const wrap=row.nextElementSibling;              /* div.tn-children */
+    const body=wrap.querySelector('.tn-body');      /* div.tn-body */
+
+    /* Fix 1 — set initial inline state (height:0 + scaleY(0)) */
+    wrap.style.height='0';
+    wrap.style.transform='scaleY(0)';
+
+    let rendered=false;
+    let collapsed=true;
+
+    /* Fix 2 — synchronous DOM build, called lazily */
+    const renderChildren=()=>{
+      if(rendered) return;
+      rendered=true;
+      const frag=document.createDocumentFragment();
+      for(let idx=0;idx<count;idx++){
+        const item=entries[idx];
+        const ck=isArr?idx:item;
+        const cv=isArr?item:value[item];
+        frag.appendChild(_buildNode(cv,ck,idx===count-1));
       }
       body.appendChild(frag);
     };
-    inner.appendChild(body);
-    const closeRow = document.createElement('div'); closeRow.className = 'tn-row';
-    const emptyTri = document.createElement('span'); emptyTri.className = 'tn-toggle';
-    closeRow.appendChild(emptyTri);
-    closeRow.appendChild(_punct(isArr?']':'}'));
-    if (!isLast) closeRow.appendChild(_punct(','));
-    inner.appendChild(closeRow);
-    wrap.appendChild(inner);
-    node.appendChild(wrap);
-    /* All nodes start collapsed */
-    wrap.classList.add('collapsed');
-    const doToggle = force => {
-      collapsed = force !== undefined ? force : !collapsed;
-      if (!collapsed) renderChildren();  /* render on first expand */
-      wrap.classList.toggle('collapsed', collapsed);
-      row.classList.toggle('is-open',   !collapsed);
-      row.classList.toggle('is-closed',  collapsed);
+
+    const doToggle=force=>{
+      collapsed=force!==undefined?force:!collapsed;
+      wrap.classList.toggle('collapsed',collapsed);
+      row.classList.toggle('is-open',  !collapsed);
+      row.classList.toggle('is-closed', collapsed);
+
+      if(!collapsed){
+        /* Fix 2 — defer DOM build + animation so click registers this frame */
+        requestAnimationFrame(()=>{
+          renderChildren();
+          /* Fix 1 — snap height open while still scaleY(0), then GPU-animate */
+          wrap.style.height='auto';
+          void wrap.offsetHeight;            /* single forced reflow — sets "from" */
+          wrap.style.transform='scaleY(1)';
+        });
+      } else {
+        /* Fix 1 — GPU-animate close, then snap height to 0 after transition */
+        wrap.style.transform='scaleY(0)';
+        wrap.addEventListener('transitionend',()=>{
+          if(collapsed) wrap.style.height='0';  /* guard: skip if re-opened */
+        },{once:true});
+      }
     };
-    const nodeId = _nodeIdCtr++;
-    row.dataset.tnId = String(nodeId);
-    _toggleMap.set(nodeId, doToggle);
+
+    _toggleMap.set(nodeId,doToggle);
     return node;
   };
-  /* Delegated click listener — one handler for the entire tree */
-  treeViewEl.addEventListener('click', e => {
-    const r = e.target.closest('[data-tn-id]');
-    if (!r) return;
-    const fn = _toggleMap.get(Number(r.dataset.tnId)); if (fn) fn();
+  treeViewEl.addEventListener('click',e=>{
+    const r=e.target.closest('[data-tn-id]');
+    if(!r) return;
+    const fn=_toggleMap.get(Number(r.dataset.tnId));if(fn) fn();
   });
-  /**
-   * _renderTree: rebuilds the tree for the current formatted JSON.
-   * Skipped if the tree is already showing the same content (state preserved).
-   */
-  const _renderTree = () => {
-    if (!_lastFormatted || !_lastParsed) { treeViewEl.innerHTML = ''; _treeContent = ''; return; }
-    if (_treeContent === _lastFormatted) return; /* same JSON — keep existing state */
-    _treeContent = _lastFormatted;
-    treeViewEl.innerHTML = '';
-    _toggleMap.clear(); _nodeIdCtr = 0;
-    /* Use cached parse result — avoids re-parsing on every view switch */
-    try { treeViewEl.appendChild(_buildNode(_lastParsed, null, true)); }
-    catch (e) { console.error('Tree render failed:', e); treeViewEl.textContent = 'Render error — see console.'; }
-    /* Re-apply tree search if open */
-    if (_searchOpen && searchInput.value) runSearchTree(false);
+  const _renderTree=()=>{
+    if(!_lastFormatted||!_lastParsed){treeViewEl.innerHTML='';_treeContent='';return;}
+    if(_treeContent===_lastFormatted) return;
+    _treeContent=_lastFormatted;
+    treeViewEl.innerHTML='';
+    _toggleMap.clear();_nodeIdCtr=0;
+    try{treeViewEl.appendChild(_buildNode(_lastParsed,null,true));}
+    catch(e){console.error('Tree render failed:',e);treeViewEl.textContent='Render error — see console.';}
+    if(_searchOpen&&searchInput.value) runSearchTree(false);
   };
-  const setViewMode = mode => {
-    outputMode = mode;
-    const isRaw = mode === 'raw';
-    outEdShell.hidden = !isRaw;
-    treeShell.hidden  =  isRaw;
-    viewRawBtn .setAttribute('aria-pressed', String(isRaw));
-    viewTreeBtn.setAttribute('aria-pressed', String(!isRaw));
-    if (isRaw) {
-      /* Force Ace repaint after becoming visible */
-      if (_aceOut) setTimeout(() => _aceOut.resize(true), 0);
-      if (_searchOpen && searchInput.value) runSearchAce(false);
-    } else {
+  const setViewMode=mode=>{
+    outputMode=mode;
+    const isRaw=mode==='raw';
+    outEdShell.hidden=!isRaw;
+    treeShell.hidden = isRaw;
+    viewRawBtn .setAttribute('aria-pressed',String(isRaw));
+    viewTreeBtn.setAttribute('aria-pressed',String(!isRaw));
+    if(isRaw){
+      if(_aceOut) setTimeout(()=>_aceOut.resize(true),0);
+      if(_searchOpen&&searchInput.value) runSearchAce(false);
+    }else{
       _renderTree();
-      if (_searchOpen && searchInput.value) runSearchTree(false);
+      if(_searchOpen&&searchInput.value) runSearchTree(false);
     }
   };
   /* ═══════════════════════════════════════════════════════════
      SEARCH ENGINE
   ═══════════════════════════════════════════════════════════ */
-  const updateCount = () => {
-    const total   = outputMode === 'raw' ? _aceTotal   : _treeMatches.length;
-    const current = outputMode === 'raw' ? _aceCurrent : (_treeCurrent + 1);
-    const q = searchInput.value;
-    if (!q) {
-      searchCount.textContent = ''; searchCount.className = 'search-count';
-      searchPrev.disabled = searchNext.disabled = true; return;
-    }
-    if (total === 0) {
-      searchCount.textContent = 'No results'; searchCount.className = 'search-count no-results';
-      searchPrev.disabled = searchNext.disabled = true;
-    } else {
-      searchCount.textContent = current + ' / ' + total;
-      searchCount.className   = 'search-count has-results';
-      searchPrev.disabled = searchNext.disabled = false;
+  const updateCount=()=>{
+    const total  =outputMode==='raw'?_aceTotal  :_treeMatches.length;
+    const current=outputMode==='raw'?_aceCurrent:(_treeCurrent+1);
+    const q=searchInput.value;
+    if(!q){searchCount.textContent='';searchCount.className='search-count';searchPrev.disabled=searchNext.disabled=true;return;}
+    if(total===0){
+      searchCount.textContent='No results';searchCount.className='search-count no-results';
+      searchPrev.disabled=searchNext.disabled=true;
+    }else{
+      searchCount.textContent=current+' / '+total;
+      searchCount.className='search-count has-results';
+      searchPrev.disabled=searchNext.disabled=false;
     }
   };
-  /* ── Ace (raw view) search ─────────────────────────────────── */
-  /**
-   * Uses Ace's session.highlight() to mark all matches (orange glow),
-   * and editor.find() / findNext() / findPrevious() for navigation.
-   * Match count is computed with a plain regex over getValue().
-   *
-   * @param {boolean} jump  — whether to jump to the first/nearest match
-   */
-  const runSearchAce = (jump = true) => {
+  const runSearchAce=(jump=true)=>{
     searchInput.classList.remove('bad-regex');
-    _aceTotal = _aceCurrent = 0;
-    if (!_aceOut) { updateCount(); return; }
-    const q = searchInput.value;
-    if (!q) {
-      _aceOut.session.highlight(null);
-      updateCount(); return;
-    }
+    _aceTotal=_aceCurrent=0;
+    if(!_aceOut){updateCount();return;}
+    const q=searchInput.value;
+    if(!q){_aceOut.session.highlight(null);updateCount();return;}
     let pattern;
-    if (_useRegex) {
-      try { pattern = new RegExp(q, 'gi'); }
-      catch { searchInput.classList.add('bad-regex'); updateCount(); return; }
-    } else {
-      pattern = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    }
-    /* Count and highlight all matches */
-    const text = _aceOut.getValue();
-    _aceTotal = (text.match(pattern) || []).length;
-    if (_aceTotal > 0) {
+    if(_useRegex){try{pattern=new RegExp(q,'gi');}catch{searchInput.classList.add('bad-regex');updateCount();return;}}
+    else{pattern=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');}
+    const text=_aceOut.getValue();
+    _aceTotal=(text.match(pattern)||[]).length;
+    if(_aceTotal>0){
       _aceOut.session.highlight(pattern);
-      if (jump) {
-        _aceCurrent = 1;
-        _aceOut.find(q, { backwards:false, wrap:true, regExp:_useRegex, caseSensitive:false });
-      }
-    } else {
-      _aceOut.session.highlight(null);
-    }
+      if(jump){_aceCurrent=1;_aceOut.find(q,{backwards:false,wrap:true,regExp:_useRegex,caseSensitive:false});}
+    }else{_aceOut.session.highlight(null);}
     updateCount();
   };
-  const navSearchAce = dir => {
-    if (!_aceTotal || !_aceOut) return;
-    if (dir > 0) { _aceOut.findNext({ wrap:true }); _aceCurrent = _aceCurrent < _aceTotal ? _aceCurrent + 1 : 1; }
-    else         { _aceOut.findPrevious({ wrap:true }); _aceCurrent = _aceCurrent > 1 ? _aceCurrent - 1 : _aceTotal; }
+  const navSearchAce=dir=>{
+    if(!_aceTotal||!_aceOut) return;
+    if(dir>0){_aceOut.findNext({wrap:true});_aceCurrent=_aceCurrent<_aceTotal?_aceCurrent+1:1;}
+    else     {_aceOut.findPrevious({wrap:true});_aceCurrent=_aceCurrent>1?_aceCurrent-1:_aceTotal;}
     updateCount();
   };
-  /* ── Tree search (data-driven, expand-on-navigate) ─────────── */
-  /*
-   * Text representation of a tree row — mirrors exactly what the DOM renders,
-   * so pattern-matching here is equivalent to matching against row.textContent.
-   */
-  const _rowText = (key, value) => {
-    const kStr = key === null ? '' :
-      (typeof key === 'number' ? '[' + key + ']' : '"' + key + '"') + ': ';
+  const _rowText=(key,value)=>{
+    const kStr=key===null?'':(typeof key==='number'?'['+key+']':'"'+key+'"')+': ';
     let vStr;
-    if      (value === null)            vStr = 'null';
-    else if (typeof value === 'string') vStr = JSON.stringify(value);
-    else if (typeof value === 'number' || typeof value === 'boolean') vStr = String(value);
-    else if (Array.isArray(value))      vStr = '[ … (' + value.length + ' items) ]';
-    else                                vStr = '{ … (' + Object.keys(value).length + ' keys) }';
-    return kStr + vStr;
+    if     (value===null)           vStr='null';
+    else if(typeof value==='string')vStr=JSON.stringify(value);
+    else if(typeof value==='number'||typeof value==='boolean')vStr=String(value);
+    else if(Array.isArray(value))   vStr='[ … ('+value.length+' items) ]';
+    else                            vStr='{ … ('+Object.keys(value).length+' keys) }';
+    return kStr+vStr;
   };
-  /*
-   * Walk data recursively. For each child whose row-text matches, push
-   * its path (array of keys/indices) onto results. Does NOT touch the DOM.
-   */
-  const _collectMatchPaths = (data, pattern, path, results) => {
-    const isArr = Array.isArray(data);
-    const keys  = isArr ? null : Object.keys(data);
-    const len   = isArr ? data.length : keys.length;
-    for (let i = 0; i < len; i++) {
-      const k         = isArr ? i : keys[i];
-      const v         = isArr ? data[i] : data[k];
-      const childPath = [...path, k];
-      pattern.lastIndex = 0;
-      if (pattern.test(_rowText(k, v))) results.push(childPath);
-      if (v !== null && typeof v === 'object') _collectMatchPaths(v, pattern, childPath, results);
+  const _collectMatchPaths=(data,pattern,path,results)=>{
+    const isArr=Array.isArray(data);
+    const keys =isArr?null:Object.keys(data);
+    const len  =isArr?data.length:keys.length;
+    for(let i=0;i<len;i++){
+      const k        =isArr?i:keys[i];
+      const v        =isArr?data[i]:data[k];
+      const childPath=[...path,k];
+      pattern.lastIndex=0;
+      if(pattern.test(_rowText(k,v))) results.push(childPath);
+      if(v!==null&&typeof v==='object') _collectMatchPaths(v,pattern,childPath,results);
     }
   };
-  /*
-   * Given a path (e.g. ['users', 0, 'name']), expand ONLY the ancestor
-   * nodes needed to reveal the target — using renderChildren (all children
-   * at once). Returns the .tn-row element for the leaf, or null.
-   */
-  const _revealPath = path => {
-    const rootTn = treeViewEl.querySelector(':scope > .tn');
-    if (!rootTn) return null;
-    if (path.length === 0) return rootTn.querySelector(':scope > .tn-row');
-    let currentTn = rootTn;
-    for (let depth = 0; depth < path.length; depth++) {
-      const seg = path[depth];
-      /* Expand if currently collapsed — renderChildren fires automatically via doToggle */
-      const tnChildren = currentTn.querySelector(':scope > .tn-children');
-      if (tnChildren && tnChildren.classList.contains('collapsed')) {
-        const headerRow = currentTn.querySelector(':scope > .tn-row[data-tn-id]');
-        if (headerRow) {
-          const fn = _toggleMap.get(Number(headerRow.dataset.tnId));
-          if (fn) fn(); /* expand + render all children */
-        }
+  const _revealPath=path=>{
+    const rootTn=treeViewEl.querySelector(':scope > .tn');
+    if(!rootTn) return null;
+    if(path.length===0) return rootTn.querySelector(':scope > .tn-row');
+    let currentTn=rootTn;
+    for(let depth=0;depth<path.length;depth++){
+      const seg=path[depth];
+      const tnChildren=currentTn.querySelector(':scope > .tn-children');
+      if(tnChildren&&tnChildren.classList.contains('collapsed')){
+        const headerRow=currentTn.querySelector(':scope > .tn-row[data-tn-id]');
+        if(headerRow){const fn=_toggleMap.get(Number(headerRow.dataset.tnId));if(fn) fn();}
       }
-      const body = currentTn.querySelector(':scope > .tn-children > .tn-inner > .tn-body');
-      if (!body) return null;
-      /* Find target child (all children are now rendered) */
-      const wantText = typeof seg === 'number' ? '[' + seg + ']' : '"' + seg + '"';
-      let found = null;
-      for (const child of body.querySelectorAll(':scope > .tn')) {
-        const keySpan = child.querySelector(':scope > .tn-row > .json-key, :scope > .tn-row > .json-index');
-        if (keySpan && keySpan.textContent === wantText) { found = child; break; }
+      const body=currentTn.querySelector(':scope > .tn-children > .tn-inner > .tn-body');
+      if(!body) return null;
+      const wantText=typeof seg==='number'?'['+seg+']':'"'+seg+'"';
+      let found=null;
+      for(const child of body.querySelectorAll(':scope > .tn')){
+        const keySpan=child.querySelector(':scope > .tn-row > .json-key, :scope > .tn-row > .json-index');
+        if(keySpan&&keySpan.textContent===wantText){found=child;break;}
       }
-      if (!found) return null;
-      if (depth === path.length - 1) return found.querySelector(':scope > .tn-row');
-      currentTn = found;
+      if(!found) return null;
+      if(depth===path.length-1) return found.querySelector(':scope > .tn-row');
+      currentTn=found;
     }
     return null;
   };
-  /* Clear old highlights, reveal + highlight the match at index idx. */
-  const _revealAndHighlight = idx => {
-    treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh', 'active'));
-    const path = _treeMatches[idx];
-    if (!path) return;
-    const row = _revealPath(path);
-    if (!row) return;
-    row.classList.add('tree-sh', 'active');
-    row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  const _revealAndHighlight=idx=>{
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
+    const path=_treeMatches[idx];if(!path) return;
+    const row=_revealPath(path);if(!row) return;
+    row.classList.add('tree-sh','active');
+    row.scrollIntoView({block:'nearest',behavior:'smooth'});
   };
-  const runSearchTree = (jump = true) => {
-    treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh', 'active'));
-    _treeMatches = []; _treeCurrent = -1;
+  const runSearchTree=(jump=true)=>{
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
+    _treeMatches=[];_treeCurrent=-1;
     searchInput.classList.remove('bad-regex');
-    const q = searchInput.value;
-    if (!q) { updateCount(); return; }
+    const q=searchInput.value;
+    if(!q){updateCount();return;}
     let pattern;
-    if (_useRegex) {
-      try { pattern = new RegExp(q, 'gi'); }
-      catch { searchInput.classList.add('bad-regex'); updateCount(); return; }
-    } else {
-      pattern = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    }
-    if (!_lastParsed) { updateCount(); return; }
-    /* Walk the data — zero DOM expansion, finds matches in collapsed nodes too */
-    _collectMatchPaths(_lastParsed, pattern, [], _treeMatches);
+    if(_useRegex){try{pattern=new RegExp(q,'gi');}catch{searchInput.classList.add('bad-regex');updateCount();return;}}
+    else{pattern=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');}
+    if(!_lastParsed){updateCount();return;}
+    _collectMatchPaths(_lastParsed,pattern,[],_treeMatches);
     updateCount();
-    if (_treeMatches.length && jump) {
-      _treeCurrent = 0;
-      _revealAndHighlight(0);
-    }
+    if(_treeMatches.length&&jump){_treeCurrent=0;_revealAndHighlight(0);}
   };
-  const navSearchTree = dir => {
-    if (!_treeMatches.length) return;
-    _treeCurrent = ((_treeCurrent + dir) % _treeMatches.length + _treeMatches.length) % _treeMatches.length;
+  const navSearchTree=dir=>{
+    if(!_treeMatches.length) return;
+    _treeCurrent=((_treeCurrent+dir)%_treeMatches.length+_treeMatches.length)%_treeMatches.length;
     _revealAndHighlight(_treeCurrent);
     updateCount();
   };
-  /* ── Unified search / nav ─────────────────────────────────── */
-  const runSearch = () => outputMode === 'raw' ? runSearchAce()  : runSearchTree();
-  const navSearch = dir => outputMode === 'raw' ? navSearchAce(dir) : navSearchTree(dir);
-  const openSearch = () => {
-    _searchOpen = true;
+  const runSearch=()=>outputMode==='raw'?runSearchAce() :runSearchTree();
+  const navSearch=dir=>outputMode==='raw'?navSearchAce(dir):navSearchTree(dir);
+  const openSearch=()=>{
+    _searchOpen=true;
     searchBar.removeAttribute('hidden');
-    searchInput.focus(); searchInput.select();
-    if (searchInput.value) runSearch();
+    searchInput.focus();searchInput.select();
+    if(searchInput.value) runSearch();
   };
-  const closeSearch = () => {
-    if (!_searchOpen) return;
-    _searchOpen = false; _treeMatches = []; _treeCurrent = -1; _aceTotal = _aceCurrent = 0;
-    searchInput.value = ''; searchBar.setAttribute('hidden','');
-    searchCount.textContent = ''; searchCount.className = 'search-count';
-    searchPrev.disabled = searchNext.disabled = true;
-    if (_aceOut) _aceOut.session.highlight(null);
-    treeViewEl.querySelectorAll('.tree-sh').forEach(el => el.classList.remove('tree-sh','active'));
+  const closeSearch=()=>{
+    if(!_searchOpen) return;
+    _searchOpen=false;_treeMatches=[];_treeCurrent=-1;_aceTotal=_aceCurrent=0;
+    searchInput.value='';searchBar.setAttribute('hidden','');
+    searchCount.textContent='';searchCount.className='search-count';
+    searchPrev.disabled=searchNext.disabled=true;
+    if(_aceOut) _aceOut.session.highlight(null);
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
   };
   /* ── Indent selector ─────────────────────────────────────── */
-  indentSelect.addEventListener('change', () => {
-    const v = indentSelect.value;
-    indent = v === 'tab' ? '\t' : Number(v);
-    if (_lastFormatted) beautify();
+  indentSelect.addEventListener('change',()=>{
+    const v=indentSelect.value;
+    indent=v==='tab'?'\t':Number(v);
+    if(_lastFormatted) beautify();
   });
-  /* ── Debounced auto-beautify ──────────────────────────────── */
-  const debouncedBeautify = () => {
-    clearTimeout(debTimer);
-    debTimer = setTimeout(() => { if (elIn.value.trim()) beautify(); }, 300);
-  };
   /* ── Button listeners ────────────────────────────────────── */
-  document.getElementById('btn-beautify')   .addEventListener('click', beautify);
-  document.getElementById('btn-minify')     .addEventListener('click', minify);
-  document.getElementById('btn-clear')      .addEventListener('click', makeItReady);
-  document.getElementById('btn-copy')       .addEventListener('click', copyOut);
-  document.getElementById('btn-copy-icon')  .addEventListener('click', copyOut);
-  document.getElementById('btn-paste-icon') .addEventListener('click', pasteIn);
-  document.getElementById('btn-download')   .addEventListener('click', download);
-  document.getElementById('btn-sample')     .addEventListener('click', () => {
-    elIn.value = JSON.stringify(sample); refreshMeta(); beautify();
+  document.getElementById('btn-beautify')   .addEventListener('click',beautify);
+  document.getElementById('btn-minify')     .addEventListener('click',minify);
+  document.getElementById('btn-clear')      .addEventListener('click',makeItReady);
+  document.getElementById('btn-copy')       .addEventListener('click',copyOut);
+  document.getElementById('btn-copy-icon')  .addEventListener('click',copyOut);
+  document.getElementById('btn-paste-icon') .addEventListener('click',pasteIn);
+  document.getElementById('btn-download')   .addEventListener('click',download);
+  document.getElementById('btn-sample')     .addEventListener('click',()=>{
+    const text=JSON.stringify(sample);
+    setInputValue(text,true);
+    metaIn.textContent=text.length+' chars';
+    beautify();
   });
-  viewRawBtn .addEventListener('click', () => setViewMode('raw'));
-  viewTreeBtn.addEventListener('click', () => setViewMode('tree'));
-  btnUpload.addEventListener('click', () => fileIn.click());
-  fileIn.addEventListener('change', ev => { loadFile(ev.target.files[0]); fileIn.value = ''; });
+  viewRawBtn .addEventListener('click',()=>setViewMode('raw'));
+  viewTreeBtn.addEventListener('click',()=>setViewMode('tree'));
+  btnUpload.addEventListener('click',()=>fileIn.click());
+  fileIn.addEventListener('change',ev=>{loadFile(ev.target.files[0]);fileIn.value='';});
   /* ── Search listeners ────────────────────────────────────── */
-  searchInput.addEventListener('input', () => { _aceCurrent = _treeCurrent = 0; runSearch(); });
-  searchInput.addEventListener('keydown', e => {
-    if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); navSearch(1); }
-    if (e.key==='Enter' &&  e.shiftKey) { e.preventDefault(); navSearch(-1); }
-    if (e.key==='Escape') { e.preventDefault(); closeSearch(); }
+  searchInput.addEventListener('input',()=>{_aceCurrent=_treeCurrent=0;runSearch();});
+  searchInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();navSearch(1);}
+    if(e.key==='Enter'&& e.shiftKey){e.preventDefault();navSearch(-1);}
+    if(e.key==='Escape'){e.preventDefault();closeSearch();}
   });
-  searchRegexBtn.addEventListener('click', () => {
-    _useRegex = !_useRegex;
-    searchRegexBtn.setAttribute('aria-pressed', String(_useRegex));
-    _aceCurrent = _treeCurrent = 0;
+  searchRegexBtn.addEventListener('click',()=>{
+    _useRegex=!_useRegex;
+    searchRegexBtn.setAttribute('aria-pressed',String(_useRegex));
+    _aceCurrent=_treeCurrent=0;
     runSearch();
   });
-  searchPrev .addEventListener('click', () => navSearch(-1));
-  searchNext .addEventListener('click', () => navSearch(1));
-  searchClose.addEventListener('click', closeSearch);
-  /* ── Input events ────────────────────────────────────────── */
-  elIn.addEventListener('input', () => {
-    refreshMeta();
-    if (!elIn.value.trim()) { clearTimeout(debTimer); makeItReady(); }
-    else debouncedBeautify();
-  });
-  elIn.addEventListener('keydown', e => {
-    if (e.key !== 'Tab') return;
-    e.preventDefault();
-    const s = elIn.selectionStart, end = elIn.selectionEnd;
-    const tab = typeof indent === 'string' ? '\t' : ' '.repeat(indent);
-    elIn.value = elIn.value.slice(0, s) + tab + elIn.value.slice(end);
-    elIn.selectionStart = elIn.selectionEnd = s + tab.length;
-    refreshMeta();
-    if (elIn.value.trim()) debouncedBeautify();
-  });
-  elIn.addEventListener('scroll', () => { lnIn.scrollTop = elIn.scrollTop; });
+  searchPrev .addEventListener('click',()=>navSearch(-1));
+  searchNext .addEventListener('click',()=>navSearch(1));
+  searchClose.addEventListener('click',closeSearch);
   /* ── Drag-and-drop ───────────────────────────────────────── */
-  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.outline='2px dashed var(--color-primary)'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.style.outline=''; });
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault(); dropZone.style.outline='';
-    const f = e.dataTransfer.files[0]; if (f) loadFile(f);
+  dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.style.outline='2px dashed var(--color-primary)';});
+  dropZone.addEventListener('dragleave',()=>{dropZone.style.outline='';});
+  dropZone.addEventListener('drop',e=>{
+    e.preventDefault();dropZone.style.outline='';
+    const f=e.dataTransfer.files[0];if(f) loadFile(f);
   });
-  /* ── Global keyboard shortcuts ──────────────────────────── */
-  document.addEventListener('keydown', e => {
-    const ctrl = e.ctrlKey || e.metaKey;
-    if (ctrl && e.key==='f')                             { e.preventDefault(); openSearch(); return; }
-    if (_searchOpen && e.key==='F3' && !e.shiftKey)      { e.preventDefault(); navSearch(1);  return; }
-    if (_searchOpen && e.key==='F3' &&  e.shiftKey)      { e.preventDefault(); navSearch(-1); return; }
-    if (e.key==='Escape' && _searchOpen)                 { e.preventDefault(); closeSearch(); return; }
-    if (ctrl && e.key==='Enter')                         { e.preventDefault(); beautify(); return; }
-    if (ctrl && e.key.toLowerCase()==='m' && !e.shiftKey){ e.preventDefault(); minify(); return; }
-    if (ctrl && e.shiftKey && e.key.toLowerCase()==='c') { e.preventDefault(); copyOut(); return; }
-    if (ctrl && e.shiftKey && e.key.toLowerCase()==='x') { e.preventDefault(); makeItReady(); return; }
+  /* ── Global keyboard shortcuts ───────────────────────────────
+     Fires when focus is outside either Ace instance.
+     Shortcuts inside the input Ace are bound as Ace commands above.
+  ──────────────────────────────────────────────────────────── */
+  document.addEventListener('keydown',e=>{
+    const ctrl=e.ctrlKey||e.metaKey;
+    if(ctrl&&e.key==='f')                              {e.preventDefault();openSearch();return;}
+    if(_searchOpen&&e.key==='F3'&&!e.shiftKey)         {e.preventDefault();navSearch(1); return;}
+    if(_searchOpen&&e.key==='F3'&& e.shiftKey)         {e.preventDefault();navSearch(-1);return;}
+    if(e.key==='Escape'&&_searchOpen)                  {e.preventDefault();closeSearch();return;}
+    if(ctrl&&e.key==='Enter')                          {e.preventDefault();beautify();   return;}
+    if(ctrl&&e.key.toLowerCase()==='m'&&!e.shiftKey)   {e.preventDefault();minify();     return;}
+    if(ctrl&&e.shiftKey&&e.key.toLowerCase()==='c')    {e.preventDefault();copyOut();    return;}
+    if(ctrl&&e.shiftKey&&e.key.toLowerCase()==='x')    {e.preventDefault();makeItReady();return;}
   });
   /* ── Initial state ───────────────────────────────────────── */
-  refreshMeta();
-  setMsg('Ready', 'Paste your raw JSON, upload a file, or load the sample.');
-  elIn.focus();
+  setMsg('Ready','Paste your JSON here, upload a file, or load the sample.');
+  setTimeout(()=>{if(_taIn) _taIn.focus();},50);
 })();
 </script>
 </body>
