@@ -979,26 +979,34 @@ URL.revokeObjectURL(_workerBlob);
       body.appendChild(frag);
     };
 
-    const doToggle=force=>{
+    const doToggle=(force,sync)=>{
       collapsed=force!==undefined?force:!collapsed;
       wrap.classList.toggle('collapsed',collapsed);
       row.classList.toggle('is-open',  !collapsed);
       row.classList.toggle('is-closed', collapsed);
 
       if(!collapsed){
-        /* Fix 2 — defer DOM build + animation so click registers this frame */
-        requestAnimationFrame(()=>{
+        if(sync){
+          /* Sync path: used by search — no animation, children ready immediately */
           renderChildren();
-          /* Fix 1 — snap height open while still scaleY(0), then GPU-animate */
+          wrap.style.transition='none';
           wrap.style.height='auto';
-          void wrap.offsetHeight;            /* single forced reflow — sets "from" */
           wrap.style.transform='scaleY(1)';
-        });
+          void wrap.offsetHeight;
+          wrap.style.transition='';
+        } else {
+          /* Interactive path: rAF-deferred, GPU-animated */
+          requestAnimationFrame(()=>{
+            renderChildren();
+            wrap.style.height='auto';
+            void wrap.offsetHeight;
+            wrap.style.transform='scaleY(1)';
+          });
+        }
       } else {
-        /* Fix 1 — GPU-animate close, then snap height to 0 after transition */
         wrap.style.transform='scaleY(0)';
         wrap.addEventListener('transitionend',()=>{
-          if(collapsed) wrap.style.height='0';  /* guard: skip if re-opened */
+          if(collapsed) wrap.style.height='0';
         },{once:true});
       }
     };
@@ -1031,9 +1039,11 @@ URL.revokeObjectURL(_workerBlob);
     if(isRaw){
       if(_aceOut) setTimeout(()=>_aceOut.resize(true),0);
       if(_searchOpen&&searchInput.value) runSearchAce(false);
-    }else{
-      _renderTree();
-      if(_searchOpen&&searchInput.value) runSearchTree(false);
+    }} else {
+      requestAnimationFrame(() => {
+        _renderTree();
+        if (_searchOpen && searchInput.value) runSearchTree(false);
+      });
     }
   };
   /* ═══════════════════════════════════════════════════════════
@@ -1109,7 +1119,7 @@ URL.revokeObjectURL(_workerBlob);
       const tnChildren=currentTn.querySelector(':scope > .tn-children');
       if(tnChildren&&tnChildren.classList.contains('collapsed')){
         const headerRow=currentTn.querySelector(':scope > .tn-row[data-tn-id]');
-        if(headerRow){const fn=_toggleMap.get(Number(headerRow.dataset.tnId));if(fn) fn();}
+        if(headerRow){const fn=_toggleMap.get(Number(headerRow.dataset.tnId));if(fn) fn(false,true);}
       }
       const body=currentTn.querySelector(':scope > .tn-children > .tn-inner > .tn-body');
       if(!body) return null;
@@ -1130,7 +1140,7 @@ URL.revokeObjectURL(_workerBlob);
     const path=_treeMatches[idx];if(!path) return;
     const row=_revealPath(path);if(!row) return;
     row.classList.add('tree-sh','active');
-    row.scrollIntoView({block:'nearest',behavior:'smooth'});
+    requestAnimationFrame(()=>row.scrollIntoView({block:'nearest',behavior:'smooth'}));
   };
   const runSearchTree=(jump=true)=>{
     treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
@@ -1143,8 +1153,9 @@ URL.revokeObjectURL(_workerBlob);
     else{pattern=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');}
     if(!_lastParsed){updateCount();return;}
     _collectMatchPaths(_lastParsed,pattern,[],_treeMatches);
+    if(_treeMatches.length&&jump) _treeCurrent=0;
     updateCount();
-    if(_treeMatches.length&&jump){_treeCurrent=0;_revealAndHighlight(0);}
+    if(_treeMatches.length&&jump) _revealAndHighlight(0);
   };
   const navSearchTree=dir=>{
     if(!_treeMatches.length) return;
