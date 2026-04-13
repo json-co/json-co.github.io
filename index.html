@@ -884,7 +884,7 @@ URL.revokeObjectURL(_workerBlob);
       setInputValue(text,true);
       metaIn.textContent=text.length+' chars';
       beautify();
-      setMsg('File loaded',file.name+' — formatting…','ok');
+      setMsg('File loaded',file.name+' - processing…','ok');
     }catch(e){setMsg('Upload failed',e.message||'Unable to read this file.','err');}
   };
   /* ── Debounced auto-beautify ──────────────────────────────── */
