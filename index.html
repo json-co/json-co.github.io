@@ -1018,14 +1018,14 @@ URL.revokeObjectURL(_workerBlob);
     const fn=_toggleMap.get(Number(r.dataset.tnId));if(fn) fn();
   });
   const _renderTree=()=>{
-    if(_lastFormatted.length > 25_000_000) return setMsg('Too large for tree view','File exceeds 25 MB — use Raw mode instead.','err');
+    if(_lastFormatted.length > 25_000_000) return setMsg('Too large for tree view','File exceeds 25 MB, use Raw mode instead.','err');
     if(!_lastFormatted||!_lastParsed){treeViewEl.innerHTML='';_treeContent='';return;}
     if(_treeContent===_lastFormatted) return;
     _treeContent=_lastFormatted;
     treeViewEl.innerHTML='';
     _toggleMap.clear();_nodeIdCtr=0;
     try{treeViewEl.appendChild(_buildNode(_lastParsed,null,true));}
-    catch(e){console.error('Tree render failed:',e);treeViewEl.textContent='Render error — see console.';}
+    catch(e){console.error('Tree render failed:',e);treeViewEl.textContent='Render error, see console.';}
     if(_searchOpen&&searchInput.value) runSearchTree(false);
   };
   const setViewMode=mode=>{
