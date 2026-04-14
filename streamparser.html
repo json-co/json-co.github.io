@@ -1,0 +1,1238 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A beautiful JSON beautifier." />
+  <title>JSON Beautifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/c/c9/JSON_vector_logo.svg">
+  <link rel="alternate icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/160px-JSON_vector_logo.svg.png">
+  <!-- Anti-FOUC theme -->
+  <script>
+    (() => {
+      const saved = (() => { try { return localStorage.getItem('json-theme'); } catch { return null; } })();
+      const dark   = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', saved || (dark ? 'dark' : 'light'));
+    })();
+  </script>
+  <style>
+    /* ── Design tokens ─────────────────────────────────────────── */
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --space-1:.25rem; --space-2:.5rem; --space-3:.75rem;
+      --space-4:1rem;   --space-5:1.25rem; --space-6:1.5rem;
+      --space-8:2rem;   --space-10:2.5rem; --space-16:4rem;
+      --color-bg:              #f5f4f0;
+      --color-surface:         #f8f7f4;
+      --color-surface-2:       #fafaf8;
+      --color-surface-offset:  #eceae4;
+      --color-surface-dynamic: #e0ddd6;
+      --color-divider:         #dbd7cf;
+      --color-border:          rgba(40,37,29,.12);
+      --color-text:            #1e1c17;
+      --color-text-muted:      #69655e;
+      --color-text-faint:      #a09c95;
+      --color-text-inverse:    #f5f4f0;
+      --color-primary:         #0a6a70;
+      --color-primary-hover:   #084e54;
+      --color-success:         #3a6e1a;
+      --color-warning:         #96521a;
+      --color-error:           #c0152a;
+      --radius-sm:.5rem; --radius-md:.875rem; --radius-lg:1.25rem; --radius-xl:1.75rem; --radius-full:9999px;
+      --shadow-sm:    0 1px 3px rgba(30,28,20,.08);
+      --shadow-md:    0 6px 24px rgba(30,28,20,.1);
+      --shadow-lg:    0 20px 60px rgba(30,28,20,.14);
+      --shadow-inset: inset 0 1px 3px rgba(30,28,20,.07);
+      --trans: 180ms cubic-bezier(.16,1,.3,1);
+      --font-display: "Inter", system-ui, sans-serif;
+      --font-body:    "Inter", system-ui, sans-serif;
+      --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    [data-theme="dark"] {
+      --color-bg:              #111110;
+      --color-surface:         #161614;
+      --color-surface-2:       #1c1b19;
+      --color-surface-offset:  #222120;
+      --color-surface-dynamic: #2a2926;
+      --color-divider:         #282724;
+      --color-border:          rgba(255,255,255,.1);
+      --color-text:            #e8e4dc;
+      --color-text-muted:      #ada8a0;
+      --color-text-faint:      #706c65;
+      --color-text-inverse:    #111110;
+      --color-primary:         #5dbcc4;
+      --color-primary-hover:   #80cdd4;
+      --color-success:         #7dc659;
+      --color-warning:         #e8a04a;
+      --color-error:           #f87171;
+      --shadow-sm:    0 1px 3px rgba(0,0,0,.25);
+      --shadow-md:    0 6px 24px rgba(0,0,0,.34);
+      --shadow-lg:    0 20px 60px rgba(0,0,0,.5);
+      --shadow-inset: inset 0 1px 3px rgba(0,0,0,.3);
+    }
+    /* ── Base reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html {
+      -webkit-text-size-adjust:none; text-size-adjust:none;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      text-rendering:optimizeLegibility; scroll-behavior:smooth;
+    }
+    body {
+      min-height:100dvh; line-height:1.6;
+      font-family:var(--font-body); font-size:var(--text-base);
+      color:var(--color-text); background-color:var(--color-bg);
+      background-image:
+        radial-gradient(circle at 6% 0%,   rgba(10,106,112,.08) 0%, transparent 34%),
+        radial-gradient(circle at 94% 100%, rgba(10,106,112,.05) 0%, transparent 28%);
+    }
+    img, svg { display:block; max-width:100%; }
+    input, button, textarea, select { font:inherit; color:inherit; }
+    button { cursor:pointer; border:none; background:none; }
+    h1,h2,h3,h4 { line-height:1.1; }
+    :focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; border-radius:var(--radius-sm); }
+    ::selection { background:rgba(10,106,112,.2); }
+    /* ── Utilities ────────────────────────────────────────────── */
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border-width:0; }
+    .wrap { max-width:1710px; margin-inline:auto; padding-inline:1rem; }
+    /* ── Top bar — backdrop-filter removed; a solid surface colour +
+       border is visually equivalent and costs nothing on the GPU.   */
+    .topbar {
+      position:sticky; top:0; z-index:80;
+      background:var(--color-surface);
+      border-bottom:1px solid var(--color-border);
+      box-shadow:var(--shadow-sm);
+    }
+    [data-theme="dark"] .topbar { background:var(--color-surface); }
+    .topbar-inner { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); padding-block:var(--space-3); min-height:4.5rem; }
+    .header-brand { display:flex; align-items:center; gap:.75rem; text-decoration:none; color:inherit; min-width:0; }
+    .brand-logo-wrap { display:grid; place-items:center; flex:none; }
+    .brand-logo { width:40px; height:40px; }
+    .brand-text { display:flex; flex-direction:column; justify-content:center; min-width:0; }
+    .brand-name { font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; font-size:var(--text-base); margin-bottom:-5px; }
+    .brand-name .primary { color:var(--color-primary); }
+    .short-description { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .topbar-right { display:flex; align-items:center; gap:var(--space-2); flex-wrap:wrap; }
+    .icon-btn {
+      width:2.75rem; height:2.75rem; border-radius:var(--radius-full);
+      border:1px solid var(--color-border); background:var(--color-surface);
+      box-shadow:var(--shadow-sm); display:grid; place-items:center;
+      color:var(--color-text); transition:all var(--trans); flex:none;
+    }
+    .icon-btn:hover { background:var(--color-surface-offset); transform:translateY(-1px); }
+    .icon-btn:active { transform:none; }
+    /* ── Main layout ──────────────────────────────────────────── */
+    main { padding-top:var(--space-4); padding-bottom:var(--space-4); }
+    .workspace { display:grid; gap:var(--space-4); }
+    /* backdrop-filter removed from panel for the same reason */
+    .panel {
+      background:var(--color-surface);
+      border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); box-shadow:var(--shadow-md);
+      overflow:clip; min-width:0;
+    }
+    [data-theme="dark"] .panel { background:var(--color-surface); }
+    .panel-body { padding:var(--space-5); display:grid; gap:var(--space-2); padding-bottom:var(--space-2); }
+    /* ── Toolbar / Buttons ────────────────────────────────────── */
+    .toolbar { display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; align-items:center; }
+    .btn-row { display:flex; flex-wrap:wrap; gap:var(--space-2); }
+    .btn {
+      height:2.75rem; padding-inline:var(--space-4); border-radius:var(--radius-full);
+      border:1px solid var(--color-border); background:var(--color-surface-2);
+      box-shadow:var(--shadow-sm); display:inline-flex; align-items:center;
+      gap:var(--space-2); font-size:var(--text-sm); font-weight:500;
+      transition:all var(--trans); min-height:44px;
+    }
+    .btn:hover  { background:var(--color-surface-offset); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+    .btn:active { transform:none; box-shadow:var(--shadow-sm); }
+    .btn.primary { background:var(--color-primary); color:var(--color-text-inverse); border-color:transparent; }
+    .btn.primary:hover { background:var(--color-primary-hover); }
+    /* ── Editors ──────────────────────────────────────────────── */
+    .editors { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
+    .ed-wrap  { display:grid; gap:var(--space-2); min-width:0; }
+    .ed-topbar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
+    .ed-topbar label { font-size:var(--text-sm); font-weight:700; font-family:var(--font-display); }
+    .ed-meta { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .ed-shell {
+      position:relative; border:1px solid var(--color-border);
+      border-radius:var(--radius-lg); overflow:hidden;
+      background:var(--color-surface-2); box-shadow:var(--shadow-inset);
+      min-height:calc(100vh - 270px); height:calc(100vh - 270px);
+    }
+    .hidden-file { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    /* ── Pane corner action buttons ─────────────────────────── */
+    .pane-btn {
+      position:absolute; top:10px; right:10px; z-index:15;
+      display:grid; place-items:center;
+      color:var(--color-text-faint);
+      border-radius:0 var(--radius-lg) 0 var(--radius-md);
+      border:none; cursor:pointer;
+      transition:color var(--trans), background var(--trans);
+    }
+    .pane-btn:hover { color:var(--color-primary);}
+    /* ── Message box ──────────────────────────────────────────── */
+    .msg-row  { display:flex; align-items:center; gap:var(--space-2); }
+    .msg-box  { display:flex; align-items:center; gap:var(--space-2); flex:1; transition:color var(--trans); }
+    .msg-box[data-state="ok"]  { color:var(--color-success); }
+    .msg-box[data-state="err"] { color:var(--color-error); }
+    .msg-box strong { font-size:var(--text-xs); white-space:nowrap; }
+    .msg-box strong::after { content:":"; }
+    .msg-box p { font-size:var(--text-xs); margin:0; color:var(--color-text-muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .msg-box[data-state="ok"]  p,
+    .msg-box[data-state="err"] p { color:inherit; opacity:.8; }
+    .w-spinner { width:.8rem; height:.8rem; flex:none; border:1.5px solid var(--color-border); border-top-color:var(--color-primary); border-radius:50%; }
+    .w-spinner:not(.active) { display:none; }
+    .w-spinner.active { display:block; animation:wspin .65s linear infinite; }
+    @keyframes wspin { to { transform:rotate(360deg); } }
+    /* ── Status bar ───────────────────────────────────────────── */
+    .statusbar {
+      display:flex; flex-wrap:wrap; gap:var(--space-3); align-items:center;
+      justify-content:space-between;
+      padding:var(--space-3) var(--space-5);
+      border-top:1px solid var(--color-divider); background:var(--color-surface-2);
+      font-size:var(--text-xs);
+    }
+    .chip-row { display:flex; flex-wrap:wrap; gap:var(--space-2); align-items:center; }
+    .chip {
+      display:inline-flex; align-items:center; gap:var(--space-2);
+      padding:.1rem .85rem; border-radius:var(--radius-full);
+      background:var(--color-surface-offset); border:1px solid var(--color-border);
+      font-size:var(--text-xs); color:var(--color-text-muted); transition:all var(--trans);
+    }
+    .chip strong { color:var(--color-text); }
+    .indent-select {
+      padding:.1rem 1.8rem .1rem .85rem; border-radius:4px;
+      border:1px solid var(--color-border); color:var(--color-text);
+      background-color:var(--color-surface-2);
+      font-size:var(--text-xs); font-family:var(--font-body); cursor:pointer;
+      transition:all var(--trans); appearance:none; -webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a09c95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right .6rem center;
+    }
+    .indent-select:hover  { background-color:var(--color-surface-dynamic); }
+    .indent-select:focus  { outline:2px solid var(--color-primary); outline-offset:2px; }
+    /* ── Output view toggle ───────────────────────────────────── */
+    .out-view-seg {
+      display:inline-flex; align-items:center; gap:2px; padding:2px;
+      border-radius:var(--radius-full);
+      background:var(--color-surface-offset); border:1px solid var(--color-border);
+    }
+    .vbtn { padding-inline:var(--space-3); border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:500; color:var(--color-text-muted); transition:all var(--trans); cursor:pointer; border:none; background:none; }
+    .vbtn[aria-pressed="true"] { background:var(--color-primary); color:var(--color-text-inverse); box-shadow:var(--shadow-sm); }
+    .vbtn:not([aria-pressed="true"]):hover { background:var(--color-surface-dynamic); }
+    /* ── Tree shell ───────────────────────────────────────────── */
+    .tree-shell {
+      border:1px solid var(--color-border); border-radius:var(--radius-lg);
+      overflow:auto; background:var(--color-surface-2); box-shadow:var(--shadow-inset);
+      min-height:calc(100vh - 270px); height:calc(100vh - 270px);
+    }
+    .tree-view { padding:var(--space-3) var(--space-4) var(--space-3) var(--space-5); font-family:var(--font-mono); font-size:.92rem; min-width:max-content; }
+    .tn { display:block; contain:layout style;}
+    .tn-row { display:flex; align-items:center; gap:.25em; padding:.06em 3px; border-radius:var(--radius-sm); margin:0 -3px; white-space:nowrap; }
+    .tn-row:hover { background:var(--color-surface-offset); }
+    .tn-row.clickable { cursor:pointer; }
+    .tn-toggle { flex:none; width:1.15rem; display:inline-flex; align-items:center; justify-content:center; color:var(--color-text-faint); user-select:none; }
+    .tn-toggle svg { width:.75rem; height:.75rem; transition:transform var(--trans),color var(--trans); fill:currentColor; }
+    .tn-row.clickable:hover .tn-toggle { color:var(--color-primary); }
+    .tn-row.is-open   .tn-toggle svg { transform:rotate(90deg); }
+    .tn-row.is-closed .tn-toggle svg { transform:rotate(0deg); }
+    .tn-children { overflow:hidden; transform-origin:top; transition:transform 180ms ease; will-change:transform; }
+    /* .tn-children.collapsed — height/transform managed by JS doToggle */
+    .tn-inner {}
+    .tn-body { padding-left:1.35rem; position:relative; padding-right:1.5px; }
+    .tn-body::before { content:""; position:absolute; left:.52rem; top:0; bottom:.4rem; width:1px; background:var(--color-divider); border-radius:1px; }
+    .tn-summary { display:none; color:var(--color-text-faint); font-style:italic; font-size:.86em; }
+    .tn-row.is-closed .tn-summary { display:inline; }
+    .json-index { color:var(--color-primary); font-weight:600; font-size:.86em; }
+    .json-key  { color:#0a6a70; font-weight:600; } .json-str  { color:#b45309; }
+    .json-num  { color:#7c3aed; } .json-bool { color:#1d4ed8; }
+    .json-null { color:#9c2973; } .json-punct{ color:#69655e; }
+    [data-theme="dark"] .json-key  { color:#5dbcc4; } [data-theme="dark"] .json-str  { color:#f59e0b; }
+    [data-theme="dark"] .json-num  { color:#a78bfa; } [data-theme="dark"] .json-bool { color:#60a5fa; }
+    [data-theme="dark"] .json-null { color:#de79b8; } [data-theme="dark"] .json-punct{ color:#ada8a0; }
+    .tn-row.tree-sh        { background:rgba(234,179,8,.18); border-radius:var(--radius-sm); }
+    .tn-row.tree-sh.active { background:rgba(234,179,8,.42); outline:1px solid rgba(234,179,8,.65); margin: 1px 1px -1px -3px}
+    [data-theme="dark"] .tn-row.tree-sh        { background:rgba(234,179,8,.1); }
+    [data-theme="dark"] .tn-row.tree-sh.active { background:rgba(234,179,8,.3); }
+    /* ── Search overlay ──────────────────────────────────────── */
+    .out-shells { position:relative; }
+    .search-overlay {
+      position:absolute; top:0; right:0; z-index:30;
+      display:flex; align-items:center;;
+      padding:.3rem var(--space-3); min-height:2.2rem;
+      background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);
+      box-shadow:var(--shadow-sm); animation:sb-in 160ms cubic-bezier(.16,1,.3,1);
+    }
+    @keyframes sb-in { from { opacity:0; transform:translateY(-4px); } }
+    .search-overlay[hidden] { display:none !important; }
+    .search-icon { color:var(--color-text-faint); flex:none; }
+    .search-input {
+      flex:1; border:none; background:transparent;
+      font-family:var(--font-mono); font-size:.8rem; line-height:1.4;
+      color:var(--color-text); min-width:0; padding:4px 0; padding-left: 6px;
+      caret-color:var(--color-primary);
+    }
+    .search-input:focus { outline:none; }
+    .search-input::placeholder { color:var(--color-text-faint); font-size:.76rem; }
+    .search-input.bad-regex { color:var(--color-error); }
+    .search-sep { width:1px; height:14px; background:var(--color-border); flex:none; margin-inline:3px; }
+    .search-count { font-size:.72rem; color:var(--color-text-faint); white-space:nowrap; min-width:3rem; text-align:right; font-variant-numeric:tabular-nums; padding-right:1px; letter-spacing:.01em; }
+    .search-count.has-results { color:var(--color-text-muted); }
+    .search-count.no-results  { color:var(--color-error); }
+    .search-toggle {
+      width:1.55rem; height:1.55rem; padding:0; display:grid; place-items:center;
+      border-radius:var(--radius-sm); font-size:.68rem;
+      font-family:var(--font-mono); font-weight:700; letter-spacing:-.02em;
+      color:var(--color-text-muted); border:1px solid transparent;
+      background:transparent; cursor:pointer; transition:all var(--trans); flex:none;
+    }
+    .search-toggle:hover { background:var(--color-surface-offset); color:var(--color-text); }
+    .search-toggle[aria-pressed="true"] { background:rgba(10,106,112,.13); color:var(--color-primary); border-color:rgba(10,106,112,.28); }
+    [data-theme="dark"] .search-toggle[aria-pressed="true"] { background:rgba(93,188,196,.15); border-color:rgba(93,188,196,.3); }
+    .search-nav-btn { width:1.55rem; height:1.55rem; border-radius:var(--radius-sm); display:grid; place-items:center; color:var(--color-text-muted); border:none; background:transparent; cursor:pointer; transition:all var(--trans); flex:none; }
+    .search-nav-btn:hover:not(:disabled) { background:var(--color-surface-offset); color:var(--color-text); }
+    .search-nav-btn:disabled { opacity:.28; cursor:default; }
+    .search-close-btn { width:1.55rem; height:1.55rem; border-radius:var(--radius-sm); display:grid; place-items:center; color:var(--color-text-faint); border:none; background:transparent; cursor:pointer; transition:all var(--trans); flex:none; }
+    .search-close-btn:hover { background:rgba(192,21,42,.1); color:var(--color-error); }
+    [data-theme="dark"] .search-close-btn:hover { background:rgba(248,113,113,.1); color:var(--color-error); }
+    /* ── Custom scrollbars ───────────────────────────────────── */
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--color-divider); border-radius:9999px; }
+    ::-webkit-scrollbar-thumb:hover { background:var(--color-text-faint); }
+    ::-webkit-scrollbar-corner { background:transparent; }
+    html { scrollbar-width:thin; scrollbar-color:var(--color-divider) transparent; }
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width:800px) { .editors { grid-template-columns:1fr; } }
+    @media (max-width:640px) {
+      .panel-body,.statusbar { padding-inline:var(--space-4); }
+      .toolbar { flex-direction:column; align-items:stretch; }
+      .topbar-inner { min-height:3.75rem; }
+      .header-brand { min-width:0; }
+      .brand-text { max-width:13rem; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    }
+  
+  /* ── Output: read-only textarea (replaces Ace / JSONEditor) ────── */
+  #out-ta {
+    position:absolute; inset:0; border:none; outline:none; resize:none;
+    padding:12px 14px; color:var(--color-text); background:transparent;
+    tab-size:2; -moz-tab-size:2; white-space:pre; overflow:auto;
+    box-sizing:border-box; font-family:var(--font-mono);
+    font-size:.92rem; line-height:1.65; cursor:default;
+    caret-color:transparent; user-select:text;
+  }
+  /* ── Input: textarea with synced line-number gutter ──────── */
+  .ta-wrap{position:absolute;inset:0;display:flex;overflow:hidden;font-family:var(--font-mono);font-size:.92rem;line-height:1.65;}
+  .ta-gutter{flex:none;min-width:2.8rem;padding:12px 8px 12px 6px;text-align:right;color:var(--color-text-faint);background:linear-gradient(180deg,var(--color-surface-offset),var(--color-surface));border-right:1px solid var(--color-border);overflow:hidden;user-select:none;white-space:pre;box-sizing:border-box;}
+  .ta-input{flex:1;border:none;outline:none;resize:none;padding:12px 14px;color:var(--color-text);background:transparent;caret-color:var(--color-primary);tab-size:2;-moz-tab-size:2;white-space:pre;overflow:auto;box-sizing:border-box;}
+  .ta-input::placeholder{color:var(--color-text-faint);}
+  .ta-input:focus{outline:none;}
+</style>
+</head>
+<body>
+<header class="topbar" role="banner">
+  <div class="wrap topbar-inner">
+    <a class="header-brand" href="./" aria-label="JSON Beautifier">
+      <span class="brand-logo-wrap" aria-hidden="true">
+        <img class="brand-logo" src="https://upload.wikimedia.org/wikipedia/commons/c/c9/JSON_vector_logo.svg"
+          alt="JSON logo" width="28" height="28" loading="eager"
+          onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/JSON_vector_logo.svg/160px-JSON_vector_logo.svg.png'">
+      </span>
+      <div class="brand-text">
+        <div class="brand-name"><span class="primary">JSON</span> Beautifier</div>
+        <div class="short-description">Format · Validate · Minify</div>
+      </div>
+    </a>
+    <div class="topbar-right">
+      <div class="toolbar">
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-beautify">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+            Beautify
+          </button>
+          <button type="button" class="btn" id="btn-minify">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            Minify
+          </button>
+          <button type="button" class="btn" id="btn-upload">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
+          </button>
+          <input class="hidden-file" type="file" id="file-in" accept=".json,application/json,text/plain" tabindex="-1" />
+          <button type="button" class="btn" id="btn-clear">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+      <button class="icon-btn" type="button" id="theme-btn" aria-label="Switch theme" title="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main-content">
+  <section class="workspace" aria-label="JSON workspace">
+    <div class="panel">
+      <div class="panel-body">
+        <div class="editors">
+          <!-- ── Input — Ace editor (writable). No textarea, no line-number
+               <pre>. Ace virtualises large-file rendering natively.       -->
+          <div class="ed-wrap">
+            <div class="ed-topbar">
+              <label>Input</label>
+              <span class="ed-meta" id="meta-input">0 chars</span>
+            </div>
+            <div class="ed-shell" id="drop-zone">
+              <button class="pane-btn" id="btn-paste-icon" title="Paste from clipboard" aria-label="Paste from clipboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+              </button>
+              <div class="ta-wrap"><div class="ta-gutter" id="in-gutter" aria-hidden="true"></div><textarea id="json-input" class="ta-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Paste JSON here…" aria-label="Input JSON"></textarea></div>
+            </div>
+          </div>
+          <!-- ── Output ────────────────────────────────────── -->
+          <div class="ed-wrap">
+            <div class="ed-topbar">
+              <label>Output</label>
+              <div style="display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;height:25px;">
+                <span class="ed-meta" id="meta-output">0 chars</span>
+                <div class="out-view-seg" role="group" aria-label="Output view mode">
+                  <button type="button" class="vbtn" id="view-raw"  aria-pressed="true">Raw</button>
+                  <button type="button" class="vbtn" id="view-tree" aria-pressed="false">Tree</button>
+                </div>
+              </div>
+            </div>
+            <div class="out-shells">
+              <div class="search-overlay" id="search-bar" hidden role="search" aria-label="Search output">
+                <svg class="search-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="search-input" class="search-input" placeholder="Find in output…" autocomplete="off" spellcheck="false" aria-label="Search query" />
+                <button type="button" class="search-toggle" id="search-regex" aria-pressed="false" title="Use regular expression (.*)">.*</button>
+                <div class="search-sep" aria-hidden="true"></div>
+                <span class="search-count" id="search-count" aria-live="polite" aria-atomic="true"></span>
+                <button type="button" class="search-nav-btn" id="search-prev" title="Previous (Shift+Enter / Shift+F3)" aria-label="Previous match" disabled>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+                </button>
+                <button type="button" class="search-nav-btn" id="search-next" title="Next (Enter / F3)" aria-label="Next match" disabled>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="search-sep" aria-hidden="true"></div>
+                <button type="button" class="search-close-btn" id="search-close" title="Close (Escape)" aria-label="Close search">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="ed-shell" id="out-ed-shell">
+                <button class="pane-btn" id="btn-copy-icon" title="Copy to clipboard" aria-label="Copy to clipboard">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <textarea id="out-ta" readonly spellcheck="false" autocomplete="off" aria-label="Formatted JSON output"></textarea>
+              </div>
+              <div class="tree-shell" id="tree-shell" hidden>
+                <div class="tree-view" id="tree-view" aria-label="JSON tree view" role="tree"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="msg-row">
+          <span class="w-spinner" id="w-spinner" aria-label="Processing"></span>
+          <div class="msg-box" id="msg-box" data-state="idle" role="status" aria-live="polite">
+            <strong>Ready</strong>
+            <p>Paste your JSON here, upload a file, or load the sample.</p>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <div class="chip-row" aria-live="polite">
+          <span class="chip">Lines: <strong id="lines-text">0</strong></span>
+          <span class="chip">Bytes: <strong id="bytes-text">0</strong></span>
+          <span>Indent</span>
+          <select class="chip indent-select" id="indent-select" aria-label="Indentation size">
+            <option value="2" selected>2 spaces</option>
+            <option value="3">3 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="btn-copy">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy output
+          </button>
+          <button type="button" class="btn" id="btn-download">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .json
+          </button>
+          <button type="button" class="btn" id="btn-sample">Load sample</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1. WEB WORKER — only used for files > SYNC_THRESHOLD chars.
+      For typical API responses the synchronous path is used,
+      eliminating the postMessage / structured-clone overhead.
+   ═══════════════════════════════════════════════════════════════ */
+function _workerFn() {
+  'use strict';
+  /* Load @streamparser/json from CDN – importScripts works inside blob Workers */
+  try {
+    importScripts('https://cdn.jsdelivr.net/npm/@streamparser/json/dist/iife/index.min.js');
+  } catch(e) {
+    console.warn('[Worker] streamparser CDN failed – falling back to JSON.parse', e);
+  }
+  const enc = new TextEncoder();
+  const STREAM_THRESHOLD = 2 * 1024 * 1024; /* 2 MB */
+
+  function fmtError(msg, raw) {
+    try {
+      const ff = msg.match(/line (\d+) column (\d+)/i);
+      if (ff) return `Line ${ff[1]}, Column ${ff[2]}: ${msg.replace(/ of the JSON data\.$/i,'').trim()}`;
+      const cr = msg.match(/at position (\d+)/i) || msg.match(/position (\d+)/i);
+      if (cr && raw) {
+        const pos=+cr[1], before=raw.slice(0,pos);
+        const line=(before.match(/\n/g)||[]).length+1;
+        const col=pos-before.lastIndexOf('\n');
+        return `Line ${line}, Column ${col}: ${msg}`;
+      }
+      return msg;
+    } catch { return msg; }
+  }
+
+  function streamParse(raw) {
+    return new Promise((resolve, reject) => {
+      const SP = self.streamparserJson;
+      if (!SP || !SP.JSONParser) {
+        try { resolve(JSON.parse(raw)); } catch(e) { reject(e); }
+        return;
+      }
+      const { JSONParser } = SP;
+      let result;
+      const parser = new JSONParser({ stringBufferSize:undefined, numberBufferSize:undefined });
+      /* onValue: isPartial=false means the root value is fully assembled */
+      parser.onValue = ({ value, isPartial }) => { if (!isPartial) result = value; };
+      parser.onError = (err) => reject(err);
+      parser.onEnd   = ()    => resolve(result);
+      /* Feed in 64 KB chunks so parsing never blocks the Worker event loop */
+      const CHUNK = 65536;
+      try {
+        for (let i=0; i<raw.length; i+=CHUNK) parser.write(raw.slice(i, i+CHUNK));
+        parser.end();
+      } catch(e) { reject(e); }
+    });
+  }
+
+  self.onmessage = async function(ev) {
+    const { id, op, indent } = ev.data;
+    /* Accept a transferred ArrayBuffer (zero-copy) or a plain string */
+    const raw = ev.data.buf ? new TextDecoder().decode(ev.data.buf) : ev.data.raw;
+    try {
+      if (!raw || !raw.trim()) throw new Error('Input is empty, please paste some JSON first.');
+      const parsed = raw.length >= STREAM_THRESHOLD ? await streamParse(raw) : JSON.parse(raw);
+      const formatted = op==='minify' ? JSON.stringify(parsed) : JSON.stringify(parsed, null, indent);
+      self.postMessage({ id, ok:true, op, formatted,
+        bytes: enc.encode(formatted).length,
+        lines: formatted ? formatted.split('\n').length : 0 });
+    } catch(e) {
+      self.postMessage({ id, ok:false, op, message: fmtError(e.message||'Unknown error', raw) });
+    }
+  };
+}
+const _workerBlob=URL.createObjectURL(new Blob(['('+_workerFn.toString()+')();'],{type:'application/javascript'}));
+const _w=new Worker(_workerBlob);
+URL.revokeObjectURL(_workerBlob);
+/* ═══════════════════════════════════════════════════════════════
+   2. THEME TOGGLE
+   ═══════════════════════════════════════════════════════════════ */
+(()=>{
+  const html=document.documentElement;
+  const btn=document.getElementById('theme-btn');
+  const icons={
+    sun:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`,
+    moon:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+  };
+  let mode=html.getAttribute('data-theme')||'light';
+  const apply=()=>{
+    html.setAttribute('data-theme',mode);
+    btn.innerHTML=mode==='dark'?icons.sun:icons.moon;
+    btn.setAttribute('aria-label',mode==='dark'?'Switch to light mode':'Switch to dark mode');
+    btn.title=mode==='dark'?'Light mode':'Dark mode';
+  };
+  btn.addEventListener('click',()=>{
+    mode=mode==='dark'?'light':'dark';
+    try{localStorage.setItem('json-theme',mode);}catch(_){}
+    apply();
+    /* Repaint both Ace instances so CSS-variable token colours refresh */
+  });
+  apply();
+})();
+/* ═══════════════════════════════════════════════════════════════
+   3. MAIN EDITOR LOGIC
+   ═══════════════════════════════════════════════════════════════ */
+(()=>{
+  /* ── DOM refs ─────────────────────────────────────────────── */
+  const metaIn        =document.getElementById('meta-input');
+  const metaOut       =document.getElementById('meta-output');
+  const msgBox        =document.getElementById('msg-box');
+  const spinner       =document.getElementById('w-spinner');
+  const linesEl       =document.getElementById('lines-text');
+  const bytesEl       =document.getElementById('bytes-text');
+  const fileIn        =document.getElementById('file-in');
+  const dropZone      =document.getElementById('drop-zone');
+  const btnUpload     =document.getElementById('btn-upload');
+  const indentSelect  =document.getElementById('indent-select');
+  const treeViewEl    =document.getElementById('tree-view');
+  const treeShell     =document.getElementById('tree-shell');
+  const outEdShell    =document.getElementById('out-ed-shell');
+  const viewRawBtn    =document.getElementById('view-raw');
+  const viewTreeBtn   =document.getElementById('view-tree');
+  const searchBar     =document.getElementById('search-bar');
+  const searchInput   =document.getElementById('search-input');
+  const searchRegexBtn=document.getElementById('search-regex');
+  const searchCount   =document.getElementById('search-count');
+  const searchPrev    =document.getElementById('search-prev');
+  const searchNext    =document.getElementById('search-next');
+  const searchClose   =document.getElementById('search-close');
+  /* ── State ──────────────────────────────────────────────────── */
+  let indent        =2;
+  let outputMode    ='raw';
+  let debTimer      =null;
+  let _pendingId    =0;
+  let _lastFormatted='';
+  let _lastParsed   =null;
+  let _treeContent  ='';
+  let _nodeIdCtr    =0;
+  let _resetting    =false;  /* guards makeItReady / setValue loop */
+  const _toggleMap  =new Map();
+  const _enc        =new TextEncoder();
+  let _searchOpen   =false;
+  let _useRegex     =false;
+  let _aceTotal     =0;
+  let _aceCurrent   =0;
+  let _treeMatches  =[];
+  let _treeCurrent  =-1;
+  /* ── Sync threshold: below this we skip the Worker entirely.
+     JSON.parse + JSON.stringify is instant for < ~100 KB files,
+     eliminating the postMessage / structured-clone round-trip
+     for the vast majority of real-world use cases.             */
+  const SYNC_THRESHOLD=100_000;
+  /* ── JSONEditor / Ace setup ──────────────────────────────────── */
+  let _taIn=null,_taGutter=null;
+  const _updateGutter=()=>{
+    if(!_taIn||!_taGutter) return;
+    const n=_taIn.value.split('\n').length;
+    if(_taGutter._n===n){_taGutter.scrollTop=_taIn.scrollTop;return;}
+    _taGutter._n=n;
+    let s='';for(let i=1;i<=n;i++) s+=i+'\n';
+    _taGutter.textContent=s;
+    _taGutter.scrollTop=_taIn.scrollTop;
+  };
+  /* ── Input — textarea with line-number gutter ──────────────────── */
+  _taIn=document.getElementById('json-input');
+    _taGutter=document.getElementById('in-gutter');
+    _taIn.addEventListener('input',()=>{
+      if(_resetting) return;
+      const val=_taIn.value;
+      metaIn.textContent=val.length+' chars';
+      _updateGutter();
+      if(!val.trim()){clearTimeout(debTimer);makeItReady();}
+      else debouncedBeautify();
+    });
+    _taIn.addEventListener('scroll',()=>_updateGutter());
+    _taIn.addEventListener('keydown',e=>{
+      if(e.key==='Tab'){e.preventDefault();const s=_taIn.selectionStart,en=_taIn.selectionEnd;_taIn.value=_taIn.value.slice(0,s)+'  '+_taIn.value.slice(en);_taIn.selectionStart=_taIn.selectionEnd=s+2;return;}
+      const mod=e.ctrlKey||e.metaKey;if(!mod) return;
+      if(e.key==='Enter')                  {e.preventDefault();beautify();}
+      else if(e.key==='m'||e.key==='M')    {e.preventDefault();minify();}
+      else if(e.key==='f'||e.key==='F')    {e.preventDefault();openSearch();}
+      else if(e.shiftKey&&e.key==='C')     {e.preventDefault();copyOut();}
+      else if(e.shiftKey&&e.key==='X')     {e.preventDefault();makeItReady();}
+    });
+    _updateGutter();
+
+  /* ── Inline error formatter (mirrors the Worker's fmtError) ── */
+  const _fmtError=(msg,raw)=>{
+    try{
+      const ff=msg.match(/line (\d+) column (\d+)/i);
+      if(ff) return 'Line '+ff[1]+', Column '+ff[2]+' — '+msg.replace(/ of the JSON data.*/i,'').trim();
+      const cr=msg.match(/at position (\d+)/i)||msg.match(/position (\d+)/i);
+      if(cr&&raw){
+        const pos=+cr[1],before=raw.slice(0,pos);
+        const line=(before.match(/\n/g)||[]).length+1;
+        const col=pos-before.lastIndexOf('\n');
+        return 'Line '+line+', Column '+col+' — '+msg;
+      }
+    }catch(_){}
+    return msg;
+  };
+  /* ── Sample ──────────────────────────────────────────────────── */
+  const sample={
+    app:'JSON Beautifier',version:'2.0.0',
+    features:['beautify','minify','validate','copy','download','dark-mode','search'],
+    hosting:{platform:'GitHub',static:true},
+    keyboard:{beautify:'Ctrl+Enter',minify:'Ctrl+M',find:'Ctrl+F',clear:'Ctrl+Shift+X'}
+  };
+  /* ── Helpers ─────────────────────────────────────────────────── */
+  const setMsg=(title,body,state='idle')=>{
+    msgBox.dataset.state=state;
+    msgBox.innerHTML='';
+    const s=document.createElement('strong'),p=document.createElement('p');
+    s.textContent=title; p.textContent=body;
+    msgBox.append(s,p);
+  };
+  const getRaw=()=>(_taIn?_taIn.value:'');
+  /* Set input Ace value. Pass suppressChange=true to prevent the
+     'change' event from triggering debouncedBeautify/makeItReady. */
+  const setInputValue=(text,suppressChange)=>{
+    if(!_taIn) return;
+    if(suppressChange) _resetting=true;
+    _taIn.value=text;
+    _updateGutter();
+    if(suppressChange) _resetting=false;
+  };
+  /* ── setOutput ───────────────────────────────────────────────── */
+  /* Display capped at 2 MB — Download always saves the full output */
+  const MAX_OUT_DISPLAY=2_000_000;
+  const setOutput=(formatted)=>{
+    _lastFormatted=formatted;
+    try{_lastParsed=JSON.parse(formatted);}catch{_lastParsed=null;}
+    _treeContent='';
+    const outTa=document.getElementById('out-ta');
+    if(outTa){
+      const trunc=formatted.length>MAX_OUT_DISPLAY;
+      outTa.value=trunc
+        ?formatted.slice(0,MAX_OUT_DISPLAY)
+          +'\n\n// ⚠ Display capped at 2 MB ('+(formatted.length/1e6).toFixed(1)+' MB total). Use Download for the full file.'
+        :formatted;
+      if(_searchOpen&&searchInput.value) runSearchAce(false);
+    }
+    metaOut.textContent=formatted.length+' chars';
+    if(outputMode==='tree') _renderTree();
+  };
+  /* ── handleError ─────────────────────────────────────────────── */
+  const handleError=(msg,raw)=>{
+    const richMsg=_fmtError(msg,raw);
+    const outTa=document.getElementById('out-ta');
+    if(outTa) outTa.value='';
+    _lastFormatted='';_lastParsed=null;_treeContent='';
+    metaOut.textContent='0 chars';
+    linesEl.textContent='0';bytesEl.textContent='0';
+    setMsg('Error',richMsg,'err');
+  };
+  /* ── Worker handler (large files only) ─────────────────────── */
+  _w.onmessage=ev=>{
+    const{id,ok,op,formatted,bytes,lines,message}=ev.data;
+    if(id!==_pendingId) return;
+    spinner.classList.remove('active');
+    if(ok){
+      setOutput(formatted);
+      linesEl.textContent=String(lines);
+      bytesEl.textContent=String(bytes);
+      setMsg(
+        op==='beautify'?'Beautified':'Minified',
+        op==='beautify'
+          ?'JSON formatted with '+(typeof indent==='number'?indent+' spaces':'tabs')+' of indentation.'
+          :'All unnecessary whitespace removed.',
+        'ok'
+      );
+    }else{
+      handleError(message,getRaw());
+    }
+  };
+  _w.onerror=e=>{
+    spinner.classList.remove('active');
+    setMsg('Worker error',e.message||'Background processing failed.','err');
+  };
+  /* ── dispatch ────────────────────────────────────────────────
+     FAST PATH  (< SYNC_THRESHOLD chars): JSON.parse + stringify
+     runs synchronously on the main thread — zero copy overhead,
+     zero event-loop latency. Output appears in the same frame.
+
+     WORKER PATH (>= SYNC_THRESHOLD): offloads to the Worker so
+     multi-MB files never block the UI thread.
+  ──────────────────────────────────────────────────────────── */
+  const dispatch=op=>{
+    const raw=getRaw();
+    if(!raw.trim()){setMsg('Empty','Paste JSON first.','err');return;}
+    if(raw.length<SYNC_THRESHOLD){
+      try{
+        const parsed=JSON.parse(raw);
+        const formatted=op==='minify'?JSON.stringify(parsed):JSON.stringify(parsed,null,indent);
+        setOutput(formatted);
+        linesEl.textContent=String(formatted?formatted.split('\n').length:0);
+        bytesEl.textContent=String(_enc.encode(formatted).length);
+        setMsg(
+          op==='beautify'?'Beautified':'Minified',
+          op==='beautify'
+            ?'JSON formatted with '+(typeof indent==='number'?indent+' spaces':'tabs')+' of indentation.'
+            :'All unnecessary whitespace removed.',
+          'ok'
+        );
+      }catch(e){handleError(e.message||'Unknown error',raw);}
+      return;
+    }
+    /* Large file: encode → ArrayBuffer → transfer (zero-copy, no clone) */
+    spinner.classList.add('active');
+    const buf=_enc.encode(raw).buffer;
+    _w.postMessage({id:++_pendingId,op,indent,buf},[buf]);
+  };
+  const beautify=()=>dispatch('beautify');
+  const minify  =()=>dispatch('minify');
+  /* ── makeItReady ─────────────────────────────────────────────── */
+  const makeItReady=()=>{
+    clearTimeout(debTimer); _pendingId++;
+    spinner.classList.remove('active');
+    setInputValue('',true); /* suppressChange prevents re-entry */
+    _lastFormatted='';_lastParsed=null;_treeContent='';
+    const _clrTa=document.getElementById('out-ta'); if(_clrTa) _clrTa.value='';
+    treeViewEl.innerHTML='';_toggleMap.clear();_nodeIdCtr=0;
+    metaIn.textContent='0 chars';metaOut.textContent='0 chars';
+    linesEl.textContent='0';bytesEl.textContent='0';
+    closeSearch();
+    setMsg('Ready','Paste your JSON here, upload a file, or load the sample.');
+  };
+  /* ── Clipboard ────────────────────────────────────────────────── */
+  const legacyCopy=text=>{
+    const t=Object.assign(document.createElement('textarea'),{value:text,readOnly:true});
+    Object.assign(t.style,{position:'fixed',top:'-9999px',opacity:'0'});
+    document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+  };
+  const copyOut=async()=>{
+    if(!_lastFormatted){setMsg('Nothing to copy','Generate output first.','err');return;}
+    try{
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(_lastFormatted);
+      else legacyCopy(_lastFormatted);
+      setMsg('Copied','Output JSON copied to clipboard.','ok');
+    }catch(e){setMsg('Copy failed',e.message||'Clipboard access denied.','err');}
+  };
+  const pasteIn=async()=>{
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        const text=await navigator.clipboard.readText();
+        if(!text) return;
+        setInputValue(text,true);
+        metaIn.textContent=text.length+' chars';
+        beautify();
+      }
+    }catch(e){setMsg('Paste failed',e.message||'Clipboard access denied.','err');}
+  };
+  /* ── Download ─────────────────────────────────────────────────── */
+  const download=()=>{
+    if(!_lastFormatted){setMsg('Nothing to download','Generate output first.','err');return;}
+    const url=URL.createObjectURL(new Blob([_lastFormatted],{type:'application/json'}));
+    const a=Object.assign(document.createElement('a'),{href:url,download:'formatted.json'});
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    setMsg('Download started','Your formatted JSON file is being saved.','ok');
+  };
+  /* ── File loading ─────────────────────────────────────────────── */
+  const loadFile=async file=>{
+    if(!file) return;
+    try{
+      if(file.size>5*1024*1024)
+        setMsg('Large file',`${(file.size/1024/1024).toFixed(1)} MB — streaming read in progress…`,'idle');
+      /* Stream in chunks instead of file.text() which spikes RAM for large files */
+      const chunks=[];
+      const reader=file.stream().getReader();
+      const decoder=new TextDecoder();
+      while(true){
+        const {done,value}=await reader.read();
+        if(done) break;
+        chunks.push(decoder.decode(value,{stream:true}));
+      }
+      const text=chunks.join('');
+      setInputValue(text,true);
+      metaIn.textContent=text.length+' chars';
+      beautify();
+      setMsg('File loaded',file.name+' — processing…','ok');
+    }catch(e){setMsg('Upload failed',e.message||'Unable to read this file.','err');}
+  };
+  /* ── Debounced auto-beautify ──────────────────────────────── */
+  const debouncedBeautify=()=>{
+    clearTimeout(debTimer);
+    debTimer=setTimeout(()=>{if(getRaw().trim()) beautify();},300);
+  };
+  /* ═══════════════════════════════════════════════════════════
+     TREE BUILDER — GPU-composited, rAF-deferred, ~4 el/node, contain:layout
+     ═══════════════════════════════════════════════════════════
+     Fix 1: scaleY transition (compositor thread, zero layout cost)
+     Fix 2: renderChildren deferred behind requestAnimationFrame
+     Fix 3: insertAdjacentHTML reduces per-node DOM from ~9 → ~4 elements
+     Fix 4: contain:layout style on .tn (CSS, see stylesheet above)
+  ═══════════════════════════════════════════════════════════ */
+  const _CARET_HTML='<svg viewBox="0 0 8 8"><path d="M2 1.5 L6 4 L2 6.5 Z"/></svg>';
+  const _esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const _typeOf=v=>v===null?'null':Array.isArray(v)?'array':typeof v;
+
+  const _buildNode=(value,key,isLast)=>{
+    const type     =_typeOf(value);
+    const isComplex=type==='object'||type==='array';
+    const node=document.createElement('div');node.className='tn';
+    const comma=isLast?'':'<span class="json-punct">,</span>';
+    const keyHtml=key===null?''
+      :(typeof key==='number'
+        ?`<span class="json-index">[${key}]</span><span class="json-punct">: </span>`
+        :`<span class="json-key">"${_esc(key)}"</span><span class="json-punct">: </span>`);
+
+    /* ── Leaf node: div.tn > div.tn-row  (~2 real elements) ── */
+    if(!isComplex){
+      const cls=type==='string'?'json-str':type==='number'?'json-num':type==='boolean'?'json-bool':'json-null';
+      const raw=type==='string'?_esc(JSON.stringify(value)):type==='null'?'null':_esc(String(value));
+      node.insertAdjacentHTML('beforeend',
+        `<div class="tn-row"><span class="tn-toggle"></span>${keyHtml}<span class="${cls}">${raw}</span>${comma}</div>`);
+      return node;
+    }
+
+    /* ── Complex node (object/array) ── */
+    const isArr  =type==='array';
+    const entries=isArr?value:Object.keys(value);
+    const count  =entries.length;
+    const open   =isArr?'[':'{';
+    const close  =isArr?']':'}';
+    const nodeId =_nodeIdCtr++;
+
+    if(count===0){
+      node.insertAdjacentHTML('beforeend',
+        `<div class="tn-row" data-tn-id="${nodeId}"><span class="tn-toggle"></span>${keyHtml}<span class="json-punct">${open}${close}</span>${comma}</div>`);
+      return node;
+    }
+
+    const summaryTxt=isArr?`[${count} item${count!==1?'s':''}]`:`{${count} key${count!==1?'s':''}}`;
+
+    node.insertAdjacentHTML('beforeend',
+      `<div class="tn-row clickable is-closed" data-tn-id="${nodeId}">` +
+        `<span class="tn-toggle">${_CARET_HTML}</span>` +
+        `${keyHtml}` +
+        `<span class="json-punct">${open}</span>` +
+        `<span class="tn-summary"> ${summaryTxt}</span>` +
+      `</div>` +
+      `<div class="tn-children collapsed">` +
+        `<div class="tn-inner">` +
+          `<div class="tn-body"></div>` +
+          `<div class="tn-row"><span class="tn-toggle"></span><span class="json-punct">${close}</span>${comma}</div>` +
+        `</div>` +
+      `</div>`
+    );
+
+    const row =node.firstElementChild;              /* div.tn-row */
+    const wrap=row.nextElementSibling;              /* div.tn-children */
+    const body=wrap.querySelector('.tn-body');      /* div.tn-body */
+
+    /* Fix 1 — set initial inline state (height:0 + scaleY(0)) */
+    wrap.style.height='0';
+    wrap.style.transform='scaleY(0)';
+
+    let rendered=false;
+    let collapsed=true;
+
+    /* Fix 2 — synchronous DOM build, called lazily */
+    const renderChildren=()=>{
+      if(rendered) return;
+      rendered=true;
+      const frag=document.createDocumentFragment();
+      for(let idx=0;idx<count;idx++){
+        const item=entries[idx];
+        const ck=isArr?idx:item;
+        const cv=isArr?item:value[item];
+        frag.appendChild(_buildNode(cv,ck,idx===count-1));
+      }
+      body.appendChild(frag);
+    };
+
+    const doToggle=(force,sync)=>{
+      collapsed=force!==undefined?force:!collapsed;
+      wrap.classList.toggle('collapsed',collapsed);
+      row.classList.toggle('is-open',  !collapsed);
+      row.classList.toggle('is-closed', collapsed);
+
+      if(!collapsed){
+        if(sync){
+          /* Sync path: used by search — no animation, children ready immediately */
+          renderChildren();
+          wrap.style.transition='none';
+          wrap.style.height='auto';
+          wrap.style.transform='scaleY(1)';
+          void wrap.offsetHeight;
+          wrap.style.transition='';
+        } else {
+          /* Interactive path: rAF-deferred, GPU-animated */
+          requestAnimationFrame(()=>{
+            renderChildren();
+            wrap.style.height='auto';
+            void wrap.offsetHeight;
+            wrap.style.transform='scaleY(1)';
+          });
+        }
+      } else {
+        wrap.style.transform='scaleY(0)';
+        wrap.addEventListener('transitionend',()=>{
+          if(collapsed) wrap.style.height='0';
+        },{once:true});
+      }
+    };
+
+    _toggleMap.set(nodeId,doToggle);
+    return node;
+  };
+  treeViewEl.addEventListener('click',e=>{
+    const r=e.target.closest('[data-tn-id]');
+    if(!r) return;
+    const fn=_toggleMap.get(Number(r.dataset.tnId));if(fn) fn();
+  });
+  const _renderTree=()=>{
+    if(_lastFormatted.length > 25_000_000) return setMsg('Too large for tree view','File exceeds 25 MB — use Raw mode instead.','err');
+    if(!_lastFormatted||!_lastParsed){treeViewEl.innerHTML='';_treeContent='';return;}
+    if(_treeContent===_lastFormatted) return;
+    _treeContent=_lastFormatted;
+    treeViewEl.innerHTML='';
+    _toggleMap.clear();_nodeIdCtr=0;
+    try{treeViewEl.appendChild(_buildNode(_lastParsed,null,true));}
+    catch(e){console.error('Tree render failed:',e);treeViewEl.textContent='Render error — see console.';}
+    if(_searchOpen&&searchInput.value) runSearchTree(false);
+  };
+  const setViewMode=mode=>{
+    outputMode=mode;
+    const isRaw=mode==='raw';
+    outEdShell.hidden=!isRaw;
+    treeShell.hidden=isRaw;
+    viewRawBtn.setAttribute('aria-pressed',String(isRaw));
+    viewTreeBtn.setAttribute('aria-pressed',String(!isRaw));
+    if(isRaw){
+      if(_searchOpen&&searchInput.value) runSearchAce(false);
+    } else {
+      requestAnimationFrame(()=>{
+        _renderTree();
+        if(_searchOpen&&searchInput.value) runSearchTree(false);
+      });
+    }
+  };
+  /* ═══════════════════════════════════════════════════════════
+     SEARCH ENGINE
+  ═══════════════════════════════════════════════════════════ */
+  const updateCount=()=>{
+    const total  =outputMode==='raw'?_aceTotal  :_treeMatches.length;
+    const current=outputMode==='raw'?_aceCurrent:(_treeCurrent+1);
+    const q=searchInput.value;
+    if(!q){searchCount.textContent='';searchCount.className='search-count';searchPrev.disabled=searchNext.disabled=true;return;}
+    if(total===0){
+      searchCount.textContent='No results';searchCount.className='search-count no-results';
+      searchPrev.disabled=searchNext.disabled=true;
+    }else{
+      searchCount.textContent=current+' / '+total;
+      searchCount.className='search-count has-results';
+      searchPrev.disabled=searchNext.disabled=false;
+    }
+  };
+  let _searchMatches=[];
+  const runSearchAce=(jump=true)=>{
+    searchInput.classList.remove('bad-regex');
+    _aceTotal=_aceCurrent=0; _searchMatches=[];
+    const outTa=document.getElementById('out-ta');
+    if(!outTa){updateCount();return;}
+    const q=searchInput.value;
+    if(!q){updateCount();return;}
+    let pattern;
+    if(_useRegex){
+      try{pattern=new RegExp(q,'gi');}
+      catch{searchInput.classList.add('bad-regex');updateCount();return;}
+    }else{
+      pattern=new RegExp(q.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&'),'gi');
+    }
+    const text=outTa.value; let m;
+    while((m=pattern.exec(text))!==null)
+      _searchMatches.push({start:m.index,end:m.index+m[0].length});
+    _aceTotal=_searchMatches.length;
+    if(_aceTotal>0&&jump){
+      _aceCurrent=1;
+      const {start,end}=_searchMatches[0];
+      outTa.focus(); outTa.setSelectionRange(start,end);
+      outTa.scrollTop=Math.max(0,(text.slice(0,start).split('\n').length-1)*1.65*14.72-100);
+    }
+    updateCount();
+  };
+  const navSearchAce=dir=>{
+    if(!_aceTotal||!_searchMatches.length) return;
+    if(dir>0){_aceCurrent=_aceCurrent<_aceTotal?_aceCurrent+1:1;}
+    else     {_aceCurrent=_aceCurrent>1?_aceCurrent-1:_aceTotal;}
+    const match=_searchMatches[_aceCurrent-1];
+    const outTa=document.getElementById('out-ta');
+    if(outTa&&match){
+      outTa.focus(); outTa.setSelectionRange(match.start,match.end);
+      outTa.scrollTop=Math.max(0,
+        (outTa.value.slice(0,match.start).split('\n').length-1)*1.65*14.72-100);
+    }
+    updateCount();
+  };
+  const _rowText=(key,value)=>{
+    const kStr=key===null?'':(typeof key==='number'?'['+key+']':'"'+key+'"')+': ';
+    let vStr;
+    if     (value===null)           vStr='null';
+    else if(typeof value==='string')vStr=JSON.stringify(value);
+    else if(typeof value==='number'||typeof value==='boolean')vStr=String(value);
+    else if(Array.isArray(value))   vStr='[ … ('+value.length+' items) ]';
+    else                            vStr='{ … ('+Object.keys(value).length+' keys) }';
+    return kStr+vStr;
+  };
+  const _collectMatchPaths=(data,pattern,path,results)=>{
+    const isArr=Array.isArray(data);
+    const keys =isArr?null:Object.keys(data);
+    const len  =isArr?data.length:keys.length;
+    for(let i=0;i<len;i++){
+      const k        =isArr?i:keys[i];
+      const v        =isArr?data[i]:data[k];
+      const childPath=[...path,k];
+      pattern.lastIndex=0;
+      if(pattern.test(_rowText(k,v))) results.push(childPath);
+      if(v!==null&&typeof v==='object') _collectMatchPaths(v,pattern,childPath,results);
+    }
+  };
+  const _revealPath=path=>{
+    const rootTn=treeViewEl.querySelector(':scope > .tn');
+    if(!rootTn) return null;
+    if(path.length===0) return rootTn.querySelector(':scope > .tn-row');
+    let currentTn=rootTn;
+    for(let depth=0;depth<path.length;depth++){
+      const seg=path[depth];
+      const tnChildren=currentTn.querySelector(':scope > .tn-children');
+      if(tnChildren&&tnChildren.classList.contains('collapsed')){
+        const headerRow=currentTn.querySelector(':scope > .tn-row[data-tn-id]');
+        if(headerRow){const fn=_toggleMap.get(Number(headerRow.dataset.tnId));if(fn) fn(false,true);}
+      }
+      const body=currentTn.querySelector(':scope > .tn-children > .tn-inner > .tn-body');
+      if(!body) return null;
+      const wantText=typeof seg==='number'?'['+seg+']':'"'+seg+'"';
+      let found=null;
+      for(const child of body.querySelectorAll(':scope > .tn')){
+        const keySpan=child.querySelector(':scope > .tn-row > .json-key, :scope > .tn-row > .json-index');
+        if(keySpan&&keySpan.textContent===wantText){found=child;break;}
+      }
+      if(!found) return null;
+      if(depth===path.length-1) return found.querySelector(':scope > .tn-row');
+      currentTn=found;
+    }
+    return null;
+  };
+  const _revealAndHighlight=idx=>{
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
+    const path=_treeMatches[idx];if(!path) return;
+    const row=_revealPath(path);if(!row) return;
+    row.classList.add('tree-sh','active');
+    requestAnimationFrame(()=>row.scrollIntoView({block:'nearest',behavior:'smooth'}));
+  };
+  const runSearchTree=(jump=true)=>{
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
+    _treeMatches=[];_treeCurrent=-1;
+    searchInput.classList.remove('bad-regex');
+    const q=searchInput.value;
+    if(!q){updateCount();return;}
+    let pattern;
+    if(_useRegex){try{pattern=new RegExp(q,'gi');}catch{searchInput.classList.add('bad-regex');updateCount();return;}}
+    else{pattern=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');}
+    if(!_lastParsed){updateCount();return;}
+    _collectMatchPaths(_lastParsed,pattern,[],_treeMatches);
+    if(_treeMatches.length&&jump) _treeCurrent=0;
+    updateCount();
+    if(_treeMatches.length&&jump) _revealAndHighlight(0);
+  };
+  const navSearchTree=dir=>{
+    if(!_treeMatches.length) return;
+    _treeCurrent=((_treeCurrent+dir)%_treeMatches.length+_treeMatches.length)%_treeMatches.length;
+    _revealAndHighlight(_treeCurrent);
+    updateCount();
+  };
+  const runSearch=()=>outputMode==='raw'?runSearchAce() :runSearchTree();
+  const navSearch=dir=>outputMode==='raw'?navSearchAce(dir):navSearchTree(dir);
+  const openSearch=()=>{
+    _searchOpen=true;
+    searchBar.removeAttribute('hidden');
+    searchInput.focus();searchInput.select();
+    if(searchInput.value) runSearch();
+  };
+  const closeSearch=()=>{
+    if(!_searchOpen) return;
+    _searchOpen=false;_treeMatches=[];_treeCurrent=-1;_aceTotal=_aceCurrent=0;
+    searchInput.value='';searchBar.setAttribute('hidden','');
+    searchCount.textContent='';searchCount.className='search-count';
+    searchPrev.disabled=searchNext.disabled=true;
+    treeViewEl.querySelectorAll('.tree-sh').forEach(el=>el.classList.remove('tree-sh','active'));
+  };
+  /* ── Indent selector ─────────────────────────────────────── */
+  indentSelect.addEventListener('change',()=>{
+    const v=indentSelect.value;
+    indent=v==='tab'?'\t':Number(v);
+    if(_lastFormatted) beautify();
+  });
+  /* ── Button listeners ────────────────────────────────────── */
+  document.getElementById('btn-beautify')   .addEventListener('click',beautify);
+  document.getElementById('btn-minify')     .addEventListener('click',minify);
+  document.getElementById('btn-clear')      .addEventListener('click',makeItReady);
+  document.getElementById('btn-copy')       .addEventListener('click',copyOut);
+  document.getElementById('btn-copy-icon')  .addEventListener('click',copyOut);
+  document.getElementById('btn-paste-icon') .addEventListener('click',pasteIn);
+  document.getElementById('btn-download')   .addEventListener('click',download);
+  document.getElementById('btn-sample')     .addEventListener('click',()=>{
+    const text=JSON.stringify(sample);
+    setInputValue(text,true);
+    metaIn.textContent=text.length+' chars';
+    beautify();
+  });
+  viewRawBtn .addEventListener('click',()=>setViewMode('raw'));
+  viewTreeBtn.addEventListener('click',()=>setViewMode('tree'));
+  btnUpload.addEventListener('click',()=>fileIn.click());
+  fileIn.addEventListener('change',ev=>{loadFile(ev.target.files[0]);fileIn.value='';});
+  /* ── Search listeners ────────────────────────────────────── */
+  searchInput.addEventListener('input',()=>{_aceCurrent=_treeCurrent=0;runSearch();});
+  searchInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();navSearch(1);}
+    if(e.key==='Enter'&& e.shiftKey){e.preventDefault();navSearch(-1);}
+    if(e.key==='Escape'){e.preventDefault();closeSearch();}
+  });
+  searchRegexBtn.addEventListener('click',()=>{
+    _useRegex=!_useRegex;
+    searchRegexBtn.setAttribute('aria-pressed',String(_useRegex));
+    _aceCurrent=_treeCurrent=0;
+    runSearch();
+  });
+  searchPrev .addEventListener('click',()=>navSearch(-1));
+  searchNext .addEventListener('click',()=>navSearch(1));
+  searchClose.addEventListener('click',closeSearch);
+  /* ── Drag-and-drop ───────────────────────────────────────── */
+  dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.style.outline='2px dashed var(--color-primary)';});
+  dropZone.addEventListener('dragleave',()=>{dropZone.style.outline='';});
+  dropZone.addEventListener('drop',e=>{
+    e.preventDefault();dropZone.style.outline='';
+    const f=e.dataTransfer.files[0];if(f) loadFile(f);
+  });
+  /* ── Global keyboard shortcuts ───────────────────────────────
+     Fires when focus is outside either Ace instance.
+     Shortcuts inside the input Ace are bound as Ace commands above.
+  ──────────────────────────────────────────────────────────── */
+  document.addEventListener('keydown',e=>{
+    const ctrl=e.ctrlKey||e.metaKey;
+    if(ctrl&&e.key==='f')                              {e.preventDefault();openSearch();return;}
+    if(_searchOpen&&e.key==='F3'&&!e.shiftKey)         {e.preventDefault();navSearch(1); return;}
+    if(_searchOpen&&e.key==='F3'&& e.shiftKey)         {e.preventDefault();navSearch(-1);return;}
+    if(e.key==='Escape'&&_searchOpen)                  {e.preventDefault();closeSearch();return;}
+    if(ctrl&&e.key==='Enter')                          {e.preventDefault();beautify();   return;}
+    if(ctrl&&e.key.toLowerCase()==='m'&&!e.shiftKey)   {e.preventDefault();minify();     return;}
+    if(ctrl&&e.shiftKey&&e.key.toLowerCase()==='c')    {e.preventDefault();copyOut();    return;}
+    if(ctrl&&e.shiftKey&&e.key.toLowerCase()==='x')    {e.preventDefault();makeItReady();return;}
+  });
+  /* ── Initial state ───────────────────────────────────────── */
+  setMsg('Ready','Paste your JSON here, upload a file, or load the sample.');
+  setTimeout(()=>{if(_taIn) _taIn.focus();},50);
+})();
+</script>
+</body>
+</html>
